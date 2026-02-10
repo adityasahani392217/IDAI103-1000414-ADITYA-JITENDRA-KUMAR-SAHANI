@@ -1,221 +1,96 @@
+import sys
 import streamlit as st
+import pandas as pd
+from datetime import datetime
 from google import genai
+from google.genai import types
 
-# =====================================================
-# PAGE CONFIGURATION
-# =====================================================
+# ---------------- CONFIG ----------------
 st.set_page_config(
-    page_title="🌱 AgroNova – Smart Farming Assistant",
+    page_title="FarmaBuddy 🌱",
     page_icon="🌾",
     layout="wide"
 )
 
-# =====================================================
-# GOOGLE GENAI CONFIG (NEW SDK)
-# =====================================================
-if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
-    st.stop()
 
-client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
-MODEL_NAME = "gemini-1.5-flash"  # ✅ STABLE, SUPPORTED
+# ---------------- API KEY & CLIENT ----------------
+# We force the 'v1' stable API version to resolve the 404 issue.
+# Change this in your CONFIG section
+# In your API KEY & CLIENT section
+client = genai.Client(
+    api_key=st.secrets["GEMINI_API_KEY"],
+)
+# Add this temporary button to your sidebar to check names
 
-# =====================================================
-# SESSION STATE
-# =====================================================
-if "step" not in st.session_state:
-    st.session_state.step = 1
+# ---------------- HEADER ----------------
+st.markdown(
+    """
+    <h1 style='text-align:center;'>🌱 FarmaBuddy</h1>
+    <h4 style='text-align:center;'>AI-Powered Smart Farming Assistant</h4>
+    <p style='text-align:center;'>Built using Gemini | Deployed with Streamlit</p>
+    <hr>
+    """,
+    unsafe_allow_html=True
+)
 
-def next_step():
-    st.session_state.step += 1
+# ---------------- USER INPUTS ----------------
+st.sidebar.header("🌍 Farmer Inputs")
+region = st.sidebar.selectbox("Select Region", ["India", "Ghana", "Canada"])
+location = st.sidebar.text_input("Enter Location (State / Province)")
+crop_stage = st.sidebar.selectbox("Crop Stage", ["Planning", "Sowing", "Growing", "Harvesting"])
+priority = st.sidebar.multiselect("Your Priorities", ["Low Water Use", "High Yield", "Organic Farming", "Low Cost"])
+temperature = st.sidebar.slider("AI Creativity Level", 0.2, 0.9, 0.5)
 
-def prev_step():
-    st.session_state.step -= 1
+# ---------------- PROMPT ENGINE ----------------
+def build_prompt():
+    return f"""
+You are an expert agricultural advisor.
+Farmer details:
+Region: {region}
+Location: {location}
+Crop stage: {crop_stage}
+Priorities: {', '.join(priority)}
 
-# =====================================================
-# HEADER
-# =====================================================
-st.markdown("""
-## 🌱 AgroNova – Smart Farming Assistant  
-**AI-powered, global, region-aware advisory for farmers**
-""")
-
-# =====================================================
-# STEP 1 – LANGUAGE
-# =====================================================
-if st.session_state.step == 1:
-    st.subheader("🌐 Select Language / भाषा चुनें")
-
-    st.session_state.language = st.radio(
-        "Choose your preferred language:",
-        ["English", "Hindi"],
-        horizontal=True
-    )
-
-    st.button("Next ➜", on_click=next_step)
-
-# =====================================================
-# STEP 2 – LOCATION & CROP
-# =====================================================
-elif st.session_state.step == 2:
-    st.subheader("📍 Location & Crop Details")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.session_state.country = st.selectbox(
-            "Country",
-            ["India", "Canada", "Ghana"]
-        )
-
-    with col2:
-        st.session_state.region = st.text_input(
-            "State / Province / Region",
-            placeholder="e.g., Uttar Pradesh"
-        )
-
-    with col3:
-        st.session_state.crop = st.text_input(
-            "Crop",
-            placeholder="e.g., Wheat"
-        )
-
-    colA, colB = st.columns(2)
-    colA.button("⬅ Back", on_click=prev_step)
-    colB.button("Next ➜", on_click=next_step)
-
-# =====================================================
-# STEP 3 – FARM DETAILS
-# =====================================================
-elif st.session_state.step == 3:
-    st.subheader("🌾 Crop Stage & Preferences")
-
-    st.session_state.stage = st.selectbox(
-        "Crop Stage",
-        ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
-    )
-
-    st.session_state.severity = st.radio(
-        "Problem Severity",
-        ["Low", "Medium", "High"],
-        horizontal=True
-    )
-
-    prefs = st.multiselect(
-        "Farming Preferences",
-        ["Low cost", "Organic", "Minimal chemicals", "Quick results"]
-    )
-    st.session_state.preferences = ", ".join(prefs)
-
-    colA, colB = st.columns(2)
-    colA.button("⬅ Back", on_click=prev_step)
-    colB.button("Next ➜", on_click=next_step)
-
-# =====================================================
-# STEP 4 – FARMER QUESTION
-# =====================================================
-elif st.session_state.step == 4:
-    st.subheader("❓ Ask Your Farming Question")
-
-    st.session_state.query = st.text_area(
-        "Type your question here:",
-        placeholder="e.g., What should I do if pest attack occurs during growth stage?"
-    )
-
-    colA, colB = st.columns(2)
-    colA.button("⬅ Back", on_click=prev_step)
-    colB.button("Get AI Advice ➜", on_click=next_step)
-
-# =====================================================
-# STEP 5 – AI OUTPUT + VALIDATION
-# =====================================================
-elif st.session_state.step == 5:
-    st.subheader("✅ AI-Generated Farming Advice")
-
-    if st.session_state.language == "Hindi":
-        prompt = f"""
-आप एक अनुभवी कृषि विशेषज्ञ हैं।
-
-किसान की जानकारी:
-देश: {st.session_state.country}
-राज्य/क्षेत्र: {st.session_state.region}
-फसल: {st.session_state.crop}
-फसल अवस्था: {st.session_state.stage}
-समस्या की गंभीरता: {st.session_state.severity}
-किसान की प्राथमिकताएँ: {st.session_state.preferences}
-
-निर्देश:
-- उत्तर अधूरा न हो
-- बिंदुओं में उत्तर दें
-- हर सुझाव के साथ कारण दें
-- सरल भाषा का प्रयोग करें
-- रासायनिक दवा की मात्रा न बताएं
-
-उत्तर का प्रारूप:
-1. समस्या की समझ  
-2. तुरंत क्या करें  
-3. आगे से बचाव  
-4. कम लागत उपाय  
-5. कब विशेषज्ञ से संपर्क करें  
-
-किसान का प्रश्न:
-{st.session_state.query}
-
-उत्तर केवल हिंदी में दें।
+Task:
+1. Give 3 clear farming recommendations.
+2. Format as bullet points.
+3. After each recommendation, explain WHY it is useful.
+4. Keep language simple and practical.
 """
+
+# ---------------- MAIN ACTION ----------------
+if st.button("🌾 Get Smart Advice"):
+    if not location:
+        st.warning("Please enter your location.")
     else:
-        prompt = f"""
-You are an experienced agricultural expert.
+        response = client.models.generate_content(
+        model="gemini-3-flash-preview",                # <--- UPDATE THIS
+        contents=build_prompt(),
+        config={"temperature": temperature, "max_output_tokens": 512}
+        )
+        st.success("Here’s your AI-generated farming advice:")
+        st.markdown(response.text)
+ 
 
-Context:
-Country: {st.session_state.country}
-Region: {st.session_state.region}
-Crop: {st.session_state.crop}
-Crop Stage: {st.session_state.stage}
-Severity: {st.session_state.severity}
-Preferences: {st.session_state.preferences}
+# ---------------- FEEDBACK CHECKLIST ----------------
+st.markdown("## ✅ AI Output Validation Checklist")
+feedback = {
+    "Region-specific advice": st.checkbox("Advice is specific to my region"),
+    "Logical reasoning": st.checkbox("Suggestions include valid reasoning"),
+    "Simple language": st.checkbox("Language is easy to understand"),
+    "Actionable steps": st.checkbox("Advice can be applied practically"),
+    "Safe & ethical": st.checkbox("No unsafe or misleading information")
+}
 
-Instructions:
-- Provide complete advice
-- Use bullet points
-- Explain the reason for each suggestion
-- Avoid chemical dosage values
-- Keep language simple
+if st.button("📊 Submit Feedback"):
+    score = sum(feedback.values())
+    st.info(f"Feedback Score: {score}/5")
 
-Response Structure:
-1. Problem Understanding  
-2. Immediate Actions  
-3. Preventive Measures  
-4. Low-cost Options  
-5. When to Consult an Expert  
+# ---------------- USAGE LOG ----------------
+st.markdown("## 📈 Usage Snapshot")
+log_data = {"Time": datetime.now().strftime("%Y-%m-%d %H:%M"), "Region": region, "Crop Stage": crop_stage}
+st.dataframe(pd.DataFrame([log_data]))
 
-Farmer Question:
-{st.session_state.query}
-"""
-
-    try:
-        with st.spinner("🌾 Analyzing best practices..."):
-            result = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt
-            )
-            st.markdown(result.text)
-    except Exception as e:
-        st.error("⚠️ AI service temporarily unavailable.")
-        st.exception(e)
-
-    st.markdown("### 🧪 AI Output Validation Checklist")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.checkbox("Region-specific advice")
-        st.checkbox("Actionable steps")
-        st.checkbox("Simple language")
-
-    with col2:
-        st.checkbox("Clear reasoning")
-        st.checkbox("No unsafe recommendations")
-        st.checkbox("Avoids over-generalization")
-
-    st.button("🔄 Start New Query", on_click=lambda: st.session_state.update(step=1))
+# ---------------- FOOTER ----------------
+st.markdown("<hr><p style='text-align:center; font-size:14px;'>FA-2 Project | 2026</p>", unsafe_allow_html=True)
