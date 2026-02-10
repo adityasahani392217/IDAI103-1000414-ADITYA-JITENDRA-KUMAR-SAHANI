@@ -1,6 +1,2 @@
 streamlit
-google-generativeai
-requests
-pandas
-matplotlib
-gTTS
+google-generativeai==0.7.2
