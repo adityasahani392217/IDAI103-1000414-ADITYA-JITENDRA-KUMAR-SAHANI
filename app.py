@@ -1,6 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
+from gtts import gTTS
+import tempfile
+import os
 
 # =====================================================
 # PAGE CONFIGURATION
@@ -12,7 +15,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# SECURE GEMINI CONFIGURATION
+# API CONFIGURATION
 # =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
@@ -21,10 +24,10 @@ if "GOOGLE_API_KEY" not in st.secrets:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 model = genai.GenerativeModel(
-    model_name="gemini-3-flash-preview",
+    model_name="models/gemini-1.5-flash",
     generation_config={
-        "temperature": 0.2,        # Low hallucination risk
-        "max_output_tokens": 300
+        "temperature": 0.2,
+        "max_output_tokens": 700
     }
 )
 
@@ -33,11 +36,17 @@ model = genai.GenerativeModel(
 # =====================================================
 st.markdown("""
 ## 🌱 AgroNova – Smart Farming Assistant  
-**AI-powered, region-aware advisory for farmers in India, Canada, and Ghana**
+**Region-aware, safe, and farmer-friendly AI advisory**  
+Supporting **India, Canada, and Ghana**
 """)
 
 # =====================================================
-# USER INPUTS (FA-2 STEP 4)
+# LANGUAGE SELECTION
+# =====================================================
+language = st.selectbox("🌐 Select Language", ["English", "Hindi"])
+
+# =====================================================
+# USER INPUTS (GUIDED UX)
 # =====================================================
 col1, col2, col3 = st.columns(3)
 
@@ -45,87 +54,113 @@ with col1:
     country = st.selectbox("Country", ["India", "Canada", "Ghana"])
 
 with col2:
-    location = st.text_input("Region / Province / State", placeholder="e.g., Uttar Pradesh")
+    location = st.text_input("Region / State", "Uttar Pradesh")
 
 with col3:
-    crop = st.text_input("Crop", placeholder="e.g., Wheat")
+    crop = st.text_input("Crop", "Wheat")
 
-stage = st.selectbox(
-    "Crop Stage",
-    ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
-)
+col4, col5 = st.columns(2)
+
+with col4:
+    stage = st.selectbox(
+        "Crop Stage",
+        ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
+    )
+
+with col5:
+    pest_severity = st.selectbox(
+        "Problem Severity",
+        ["Low", "Medium", "High"]
+    )
 
 preferences = st.text_area(
     "Farming Preferences",
-    placeholder="e.g., low-cost, organic methods preferred"
+    "Low cost, minimal chemicals"
 )
 
 query = st.text_input(
     "Farmer Question",
-    placeholder="e.g., What should I do if pest attack occurs at growth stage?"
+    "What should I do if pest attack occurs during growth stage?"
 )
 
 # =====================================================
-# BUTTON ACTION
+# ACTION
 # =====================================================
 if st.button("🌾 Get AI Farming Advice"):
 
     if not query.strip():
-        st.warning("Please enter a farming question.")
+        st.warning("Please enter your question.")
         st.stop()
 
     # =====================================================
-    # PROMPT ENGINEERING (FA-1 + FA-2)
+    # STRONG PROMPT (FOR FULL RESPONSE)
     # =====================================================
     prompt = f"""
-You are an agricultural expert assisting farmers globally.
+You are an experienced agricultural expert.
 
-Context:
+Farmer Context:
 Country: {country}
 Region: {location}
 Crop: {crop}
 Crop Stage: {stage}
+Problem Severity: {pest_severity}
 Preferences: {preferences}
 
-Task:
-Provide clear, actionable farming advice.
+TASK:
+Give complete farming advice.
 
-Output Rules:
-- Use bullet points
-- Each suggestion must include a short justification ("why")
-- Avoid chemical dosages
-- Keep language simple and farmer-friendly
-- Ensure advice is region-specific
+OUTPUT FORMAT (MANDATORY):
+1. Problem Understanding (1–2 lines)
+2. Immediate Actions (bullet points + why)
+3. Preventive Measures (bullet points + why)
+4. Cost-Saving Tips
+5. When to Seek Expert Help
+
+RULES:
+- Use simple farmer-friendly language
+- Avoid chemical dosage numbers
+- Keep advice region-specific
+- Do not stop early; complete all sections
+
+LANGUAGE:
+{"Hindi" if language == "Hindi" else "English"}
 
 Farmer Question:
 {query}
 """
 
-    with st.spinner("Analyzing best practices..."):
+    with st.spinner("Analyzing agricultural best practices..."):
         response = model.generate_content(prompt)
 
     # =====================================================
-    # OUTPUT FORMATTING (FA-2 STEP 4)
+    # OUTPUT
     # =====================================================
     st.markdown("### ✅ AI-Generated Farming Advice")
     st.markdown(response.text)
 
     # =====================================================
-    # FEEDBACK CHECKLIST (FA-2 STEP 5)
+    # VOICE OUTPUT (OPTIONAL BUT IMPRESSIVE)
+    # =====================================================
+    tts = gTTS(
+        text=response.text,
+        lang="hi" if language == "Hindi" else "en"
+    )
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+        tts.save(fp.name)
+        st.audio(fp.name)
+
+    # =====================================================
+    # VALIDATION CHECKLIST
     # =====================================================
     st.markdown("### 🧪 AI Output Validation Checklist")
 
-    colA, colB = st.columns(2)
-    with colA:
-        st.checkbox("Region-specific advice", value=True)
-        st.checkbox("Actionable steps provided", value=True)
-        st.checkbox("Language is simple", value=True)
-
-    with colB:
-        st.checkbox("Clear reasoning provided", value=True)
-        st.checkbox("No unsafe recommendations", value=True)
-        st.checkbox("Avoids over-generalization", value=True)
+    st.checkbox("Region-specific advice", True)
+    st.checkbox("Actionable and practical", True)
+    st.checkbox("Clear reasoning included", True)
+    st.checkbox("Language is farmer-friendly", True)
+    st.checkbox("No unsafe guidance", True)
 
     st.caption(
-        "This checklist is used during testing to validate and improve prompt quality and model reliability."
+        "Checklist used during testing to validate and optimize AI outputs."
     )
