@@ -1,45 +1,21 @@
 import streamlit as st
 import google.generativeai as genai
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# ==================================================
-# FA-2: PAGE CONFIGURATION (DESIGN)
-# ==================================================
+# =====================================================
+# PAGE CONFIGURATION
+# =====================================================
 st.set_page_config(
-    page_title="AgroNova | Smart Farming Assistant (UP)",
+    page_title="AgroNova | Smart Farming Assistant",
     page_icon="🌾",
     layout="wide"
 )
 
-# ==================================================
-# FA-2: UI STYLING
-# ==================================================
-st.markdown("""
-<style>
-.stApp { background-color: #0b0f14; color: #eaeaea; }
-.header {
-    background: linear-gradient(90deg, #1fa2ff, #12d8fa, #a6ffcb);
-    padding: 30px;
-    border-radius: 16px;
-    color: black;
-    margin-bottom: 25px;
-}
-.stButton>button {
-    background-color: #ffd166;
-    color: black;
-    font-weight: bold;
-    border-radius: 8px;
-    padding: 12px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ==================================================
-# FA-2: SECURE API CONFIGURATION
-# ==================================================
+# =====================================================
+# SECURE GEMINI CONFIGURATION
+# =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("API key not found. Please add GOOGLE_API_KEY in Streamlit Secrets.")
+    st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
     st.stop()
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
@@ -47,123 +23,109 @@ genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config={
-        "temperature": 0.2,          # FA-1: hallucination control
-        "max_output_tokens": 400
+        "temperature": 0.2,        # Low hallucination risk
+        "max_output_tokens": 500
     }
 )
 
-# ==================================================
-# HEADER (FA-1: PROBLEM CONTEXT)
-# ==================================================
+# =====================================================
+# HEADER
+# =====================================================
 st.markdown("""
-<div class="header">
-<h1>🌾 AgroNova – Smart Farming Assistant</h1>
-<p>Generative AI–based advisory system for farmers in Uttar Pradesh</p>
-</div>
-""", unsafe_allow_html=True)
+## 🌱 AgroNova – Smart Farming Assistant  
+**AI-powered, region-aware advisory for farmers in India, Canada, and Ghana**
+""")
 
-# ==================================================
-# FA-1: USER PERSONA (UP)
-# ==================================================
-with st.sidebar:
-    st.header("👤 Farmer Persona")
-
-    farmer_name = st.text_input("Name", "Ram Saran Verma")
-    farmer_location = st.text_input("Location", "Barabanki, Uttar Pradesh")
-    land_size = st.text_input("Land Size", "2 Hectares")
-
-    st.divider()
-    st.markdown("**Persona Validation**")
-    st.checkbox("Region-specific", True)
-    st.checkbox("Practical guidance", True)
-    st.checkbox("Safe recommendations", True)
-
-# ==================================================
-# FA-1: FEATURE SELECTION
-# ==================================================
-districts = ["Barabanki", "Lucknow", "Sitapur", "Hardoi"]
-crops = ["Wheat", "Rice", "Mustard", "Vegetables"]
-
-col1, col2 = st.columns(2)
+# =====================================================
+# USER INPUTS (FA-2 STEP 4)
+# =====================================================
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    district = st.selectbox("District", districts)
-    crop = st.selectbox("Crop", crops)
+    country = st.selectbox("Country", ["India", "Canada", "Ghana"])
 
 with col2:
-    feature = st.selectbox(
-        "Advisory Feature",
-        [
-            "Crop Diversification",
-            "Pest & Disease Management",
-            "Weather-based Advisory",
-            "Soil Health & Fertilizer",
-            "Sustainable Farming Practices"
-        ]
-    )
-    query = st.text_input(
-        "Farmer Question",
-        placeholder="e.g., How to control pest attack safely?"
-    )
+    location = st.text_input("Region / Province / State", placeholder="e.g., Uttar Pradesh")
 
-# ==================================================
-# FA-2: INPUT VALIDATION
-# ==================================================
-if st.button("Get AI Advice"):
+with col3:
+    crop = st.text_input("Crop", placeholder="e.g., Wheat")
+
+stage = st.selectbox(
+    "Crop Stage",
+    ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
+)
+
+preferences = st.text_area(
+    "Farming Preferences",
+    placeholder="e.g., low-cost, organic methods preferred"
+)
+
+query = st.text_input(
+    "Farmer Question",
+    placeholder="e.g., What should I do if pest attack occurs at growth stage?"
+)
+
+# =====================================================
+# BUTTON ACTION
+# =====================================================
+if st.button("🌾 Get AI Farming Advice"):
+
     if not query.strip():
         st.warning("Please enter a farming question.")
         st.stop()
 
-    # ==================================================
-    # FA-1: PROMPT ENGINEERING
-    # ==================================================
+    # =====================================================
+    # PROMPT ENGINEERING (FA-1 + FA-2)
+    # =====================================================
     prompt = f"""
-You are an expert agricultural advisor working for AgroNova.
+You are an agricultural expert assisting farmers globally.
 
-Farmer Profile:
-Name: {farmer_name}
-Location: {district}, Uttar Pradesh
-Land Size: {land_size}
+Context:
+Country: {country}
+Region: {location}
 Crop: {crop}
+Crop Stage: {stage}
+Preferences: {preferences}
 
-Advisory Category: {feature}
+Task:
+Provide clear, actionable farming advice.
 
-Constraints:
-- Use safe and farmer-friendly practices
-- Avoid chemical dosage recommendations
-- Provide advice in simple bullet points
-- Keep recommendations region-specific
+Output Rules:
+- Use bullet points
+- Each suggestion must include a short justification ("why")
+- Avoid chemical dosages
+- Keep language simple and farmer-friendly
+- Ensure advice is region-specific
 
-Question:
+Farmer Question:
 {query}
 """
 
-    with st.spinner("Analyzing regional farming context..."):
+    with st.spinner("Analyzing best practices..."):
         response = model.generate_content(prompt)
 
-        st.markdown(f"### 💡 AI Advisory for {farmer_name}")
-        st.info(response.text)
+    # =====================================================
+    # OUTPUT FORMATTING (FA-2 STEP 4)
+    # =====================================================
+    st.markdown("### ✅ AI-Generated Farming Advice")
+    st.markdown(response.text)
 
-# ==================================================
-# FA-2: OUTPUT VISUALIZATION (IMPACT)
-# ==================================================
-st.write("---")
-st.markdown("### 📈 Estimated Impact of AI Advisory (Uttar Pradesh)")
+    # =====================================================
+    # FEEDBACK CHECKLIST (FA-2 STEP 5)
+    # =====================================================
+    st.markdown("### 🧪 AI Output Validation Checklist")
 
-impact_df = pd.DataFrame({
-    "Practice": ["Traditional Farming", "AI-Assisted Farming"],
-    "Average Yield (kg/ha)": [1400, 2000]
-})
+    colA, colB = st.columns(2)
+    with colA:
+        st.checkbox("Region-specific advice", value=True)
+        st.checkbox("Actionable steps provided", value=True)
+        st.checkbox("Language is simple", value=True)
 
-fig, ax = plt.subplots()
-ax.bar(
-    impact_df["Practice"],
-    impact_df["Average Yield (kg/ha)"],
-    color=["#ef476f", "#06d6a0"]
-)
-ax.set_ylabel("Yield (kg/ha)")
-st.pyplot(fig)
+    with colB:
+        st.checkbox("Clear reasoning provided", value=True)
+        st.checkbox("No unsafe recommendations", value=True)
+        st.checkbox("Avoids over-generalization", value=True)
 
-st.caption(
-    "AI-assisted yield represents estimated improvement due to timely, localized, and safe advisory support."
-)
+    st.caption(
+        "This checklist is used during testing to validate and improve prompt quality and model reliability."
+    )
