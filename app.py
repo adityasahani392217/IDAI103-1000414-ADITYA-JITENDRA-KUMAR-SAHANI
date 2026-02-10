@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# API CONFIGURATION (STABLE)
+# API CONFIGURATION (STABLE & GLOBAL)
 # =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
@@ -21,10 +21,11 @@ if "GOOGLE_API_KEY" not in st.secrets:
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
+# ✅ MOST STABLE MODEL FOR STREAMLIT CLOUD
 model = genai.GenerativeModel(
-    model_name="models/gemini-1.5-flash",
+    model_name="models/gemini-pro",
     generation_config={
-        "temperature": 0.2,
+        "temperature": 0.2,        # low hallucination risk
         "max_output_tokens": 800
     }
 )
@@ -34,22 +35,18 @@ model = genai.GenerativeModel(
 # =====================================================
 st.markdown("""
 # 🌱 AgroNova – Smart Farming Assistant  
-**AI-powered, global, region-aware advisory for farmers**  
-🌍 Supporting farmers across **all countries**
+**AI-powered, region-aware advisory for farmers worldwide**  
+🌍 Supporting **all countries**
 """)
 
 # =====================================================
 # LANGUAGE & ACCESSIBILITY
 # =====================================================
-language = st.selectbox(
-    "🌐 Select Language",
-    ["English", "Hindi"]
-)
-
+language = st.selectbox("🌐 Select Language", ["English", "Hindi"])
 voice_enabled = st.checkbox("🔊 Enable Voice Output", value=True)
 
 # =====================================================
-# GLOBAL REGION INPUTS (FA-2 ACCEPTABLE)
+# GLOBAL LOCATION INPUTS (INDUSTRY-CORRECT APPROACH)
 # =====================================================
 COUNTRIES = [
     "India", "Canada", "Ghana", "USA", "UK", "Australia", "Kenya",
@@ -63,11 +60,17 @@ with col1:
     country = st.selectbox("Country", COUNTRIES)
 
 with col2:
-    state = st.text_input("State / Province / Region", placeholder="e.g., Uttar Pradesh")
+    region = st.text_input(
+        "State / Province / Region",
+        placeholder="e.g., Uttar Pradesh / Ontario / Ashanti"
+    )
 
 with col3:
     crop = st.text_input("Crop", placeholder="e.g., Wheat")
 
+# =====================================================
+# FARMING CONTEXT
+# =====================================================
 stage = st.selectbox(
     "Crop Stage",
     ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
@@ -89,7 +92,7 @@ query = st.text_input(
 )
 
 # =====================================================
-# ACTION
+# ACTION BUTTON
 # =====================================================
 if st.button("🌾 Get AI Farming Advice"):
 
@@ -98,14 +101,14 @@ if st.button("🌾 Get AI Farming Advice"):
         st.stop()
 
     # =====================================================
-    # STRONG PROMPT (GUARANTEED FULL RESPONSE)
+    # STRONG PROMPT (FOR FULL, STRUCTURED OUTPUT)
     # =====================================================
     prompt = f"""
 You are an experienced agricultural expert.
 
 Farmer Context:
 Country: {country}
-Region: {state}
+Region: {region}
 Crop: {crop}
 Crop Stage: {stage}
 Problem Severity: {severity}
@@ -120,10 +123,10 @@ OUTPUT FORMAT (MANDATORY):
 
 RULES:
 - Use simple farmer-friendly language
-- Avoid chemical dosage values
+- Avoid chemical dosage numbers
 - Ensure region-specific advice
-- Do not stop early; complete all sections
-- Respond in {"Hindi" if language=="Hindi" else "English"}
+- Complete all sections fully
+- Respond in {"Hindi" if language == "Hindi" else "English"}
 
 Farmer Question:
 {query}
@@ -133,13 +136,13 @@ Farmer Question:
         response = model.generate_content(prompt)
 
     # =====================================================
-    # OUTPUT
+    # OUTPUT DISPLAY
     # =====================================================
     st.markdown("## ✅ AI-Generated Farming Advice")
     st.markdown(response.text)
 
     # =====================================================
-    # VOICE OUTPUT (SAFE)
+    # VOICE OUTPUT (SAFE FALLBACK)
     # =====================================================
     if voice_enabled:
         try:
@@ -154,13 +157,13 @@ Farmer Question:
             st.info("🔊 Voice output not available on this device.")
 
     # =====================================================
-    # VALIDATION CHECKLIST (FA-2 STEP 5)
+    # MODEL VALIDATION CHECKLIST (FA-2 STEP 5)
     # =====================================================
     st.markdown("## 🧪 AI Output Validation Checklist")
     st.checkbox("Region-specific advice", True)
     st.checkbox("Actionable steps provided", True)
     st.checkbox("Clear reasoning included", True)
-    st.checkbox("Language is simple", True)
+    st.checkbox("Language is farmer-friendly", True)
     st.checkbox("No unsafe or misleading advice", True)
 
     st.caption(
