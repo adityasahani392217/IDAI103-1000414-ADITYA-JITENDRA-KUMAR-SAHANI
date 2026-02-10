@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# GEMINI CONFIGURATION (STABLE + SAFE)
+# GEMINI CONFIGURATION (STABLE)
 # =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
@@ -20,7 +20,7 @@ if "GOOGLE_API_KEY" not in st.secrets:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 model = genai.GenerativeModel(
-    model_name="models/gemini-pro",   # ✅ MOST STABLE FOR STREAMLIT CLOUD
+    "models/gemini-pro",
     generation_config={
         "temperature": 0.2,
         "max_output_tokens": 800
@@ -28,7 +28,7 @@ model = genai.GenerativeModel(
 )
 
 # =====================================================
-# SESSION STATE (MULTI-STEP FLOW)
+# SESSION STATE FOR MULTI-STEP UX
 # =====================================================
 if "step" not in st.session_state:
     st.session_state.step = 1
@@ -48,18 +48,16 @@ st.markdown("""
 """)
 
 # =====================================================
-# STEP 1 – LANGUAGE SELECTION
+# STEP 1 – LANGUAGE
 # =====================================================
 if st.session_state.step == 1:
     st.subheader("🌐 Select Language / भाषा चुनें")
 
-    language = st.radio(
+    st.session_state.language = st.radio(
         "Choose your preferred language:",
         ["English", "Hindi"],
         horizontal=True
     )
-
-    st.session_state.language = language
 
     st.button("Next ➜", on_click=next_step)
 
@@ -72,26 +70,22 @@ elif st.session_state.step == 2:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        country = st.selectbox(
+        st.session_state.country = st.selectbox(
             "Country",
             ["India", "Canada", "Ghana"]
         )
 
     with col2:
-        region = st.text_input(
+        st.session_state.region = st.text_input(
             "State / Province / Region",
             placeholder="e.g., Uttar Pradesh"
         )
 
     with col3:
-        crop = st.text_input(
+        st.session_state.crop = st.text_input(
             "Crop",
             placeholder="e.g., Wheat"
         )
-
-    st.session_state.country = country
-    st.session_state.region = region
-    st.session_state.crop = crop
 
     colA, colB = st.columns(2)
     colA.button("⬅ Back", on_click=prev_step)
@@ -103,25 +97,22 @@ elif st.session_state.step == 2:
 elif st.session_state.step == 3:
     st.subheader("🌾 Crop Stage & Preferences")
 
-    stage = st.selectbox(
+    st.session_state.stage = st.selectbox(
         "Crop Stage",
         ["Land Preparation", "Sowing", "Growth Stage", "Flowering", "Harvest"]
     )
 
-    severity = st.radio(
+    st.session_state.severity = st.radio(
         "Problem Severity",
         ["Low", "Medium", "High"],
         horizontal=True
     )
 
-    preferences = st.multiselect(
+    prefs = st.multiselect(
         "Farming Preferences",
         ["Low cost", "Organic", "Minimal chemicals", "Quick results"]
     )
-
-    st.session_state.stage = stage
-    st.session_state.severity = severity
-    st.session_state.preferences = ", ".join(preferences)
+    st.session_state.preferences = ", ".join(prefs)
 
     colA, colB = st.columns(2)
     colA.button("⬅ Back", on_click=prev_step)
@@ -133,12 +124,10 @@ elif st.session_state.step == 3:
 elif st.session_state.step == 4:
     st.subheader("❓ Ask Your Farming Question")
 
-    query = st.text_area(
+    st.session_state.query = st.text_area(
         "Type your question here:",
         placeholder="e.g., What should I do if pest attack occurs during growth stage?"
     )
-
-    st.session_state.query = query
 
     colA, colB = st.columns(2)
     colA.button("⬅ Back", on_click=prev_step)
@@ -168,8 +157,8 @@ elif st.session_state.step == 5:
 - केवल अभिवादन पर समाप्त न करें
 - बिंदुओं में उत्तर दें
 - हर सुझाव के साथ कारण दें
-- सरल, किसान-समझ भाषा में लिखें
-- रासायनिक दवा की मात्रा न बताएं
+- सरल भाषा का प्रयोग करें
+- रासायनिक दवाओं की मात्रा न बताएं
 
 उत्तर का प्रारूप:
 1. समस्या की समझ  
@@ -199,7 +188,7 @@ Instructions:
 - Do NOT stop at greetings
 - Provide complete advice
 - Use bullet points
-- Explain the "why" for each suggestion
+- Explain the reason for each suggestion
 - Avoid chemical dosage values
 - Keep language simple and practical
 
@@ -214,10 +203,14 @@ Farmer Question:
 {st.session_state.query}
 """
 
-    with st.spinner("🌾 Analyzing best practices..."):
-        response = model.generate_content(prompt)
-
-    st.markdown(response.text)
+    # ---------------- GENERATION ----------------
+    try:
+        with st.spinner("🌾 Analyzing best practices..."):
+            response = model.generate_content(prompt)
+            st.markdown(response.text)
+    except Exception as e:
+        st.error("⚠️ AI service temporarily unavailable.")
+        st.exception(e)
 
     # ---------------- VALIDATION CHECKLIST ----------------
     st.markdown("### 🧪 AI Output Validation Checklist")
