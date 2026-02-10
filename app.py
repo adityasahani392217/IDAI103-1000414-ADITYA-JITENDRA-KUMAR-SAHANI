@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
 # =====================================================
 # PAGE CONFIGURATION
@@ -11,24 +11,18 @@ st.set_page_config(
 )
 
 # =====================================================
-# GEMINI CONFIGURATION (STABLE)
+# GOOGLE GENAI CONFIG (NEW SDK)
 # =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
     st.stop()
 
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
-model = genai.GenerativeModel(
-    "gemini-pro",
-    generation_config={
-        "temperature": 0.2,
-        "max_output_tokens": 800
-    }
-)
+MODEL_NAME = "gemini-1.5-flash"  # ✅ STABLE, SUPPORTED
 
 # =====================================================
-# SESSION STATE FOR MULTI-STEP UX
+# SESSION STATE
 # =====================================================
 if "step" not in st.session_state:
     st.session_state.step = 1
@@ -139,7 +133,6 @@ elif st.session_state.step == 4:
 elif st.session_state.step == 5:
     st.subheader("✅ AI-Generated Farming Advice")
 
-    # ---------------- PROMPT ENGINEERING ----------------
     if st.session_state.language == "Hindi":
         prompt = f"""
 आप एक अनुभवी कृषि विशेषज्ञ हैं।
@@ -154,15 +147,14 @@ elif st.session_state.step == 5:
 
 निर्देश:
 - उत्तर अधूरा न हो
-- केवल अभिवादन पर समाप्त न करें
 - बिंदुओं में उत्तर दें
 - हर सुझाव के साथ कारण दें
 - सरल भाषा का प्रयोग करें
-- रासायनिक दवाओं की मात्रा न बताएं
+- रासायनिक दवा की मात्रा न बताएं
 
 उत्तर का प्रारूप:
 1. समस्या की समझ  
-2. तुरंत क्या करें (कारण सहित)  
+2. तुरंत क्या करें  
 3. आगे से बचाव  
 4. कम लागत उपाय  
 5. कब विशेषज्ञ से संपर्क करें  
@@ -176,25 +168,24 @@ elif st.session_state.step == 5:
         prompt = f"""
 You are an experienced agricultural expert.
 
-Farmer Context:
+Context:
 Country: {st.session_state.country}
 Region: {st.session_state.region}
 Crop: {st.session_state.crop}
 Crop Stage: {st.session_state.stage}
-Problem Severity: {st.session_state.severity}
+Severity: {st.session_state.severity}
 Preferences: {st.session_state.preferences}
 
 Instructions:
-- Do NOT stop at greetings
 - Provide complete advice
 - Use bullet points
 - Explain the reason for each suggestion
 - Avoid chemical dosage values
-- Keep language simple and practical
+- Keep language simple
 
 Response Structure:
 1. Problem Understanding  
-2. Immediate Actions (with reasons)  
+2. Immediate Actions  
 3. Preventive Measures  
 4. Low-cost Options  
 5. When to Consult an Expert  
@@ -203,16 +194,17 @@ Farmer Question:
 {st.session_state.query}
 """
 
-    # ---------------- GENERATION ----------------
     try:
         with st.spinner("🌾 Analyzing best practices..."):
-            response = model.generate_content(prompt)
-            st.markdown(response.text)
+            result = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt
+            )
+            st.markdown(result.text)
     except Exception as e:
         st.error("⚠️ AI service temporarily unavailable.")
         st.exception(e)
 
-    # ---------------- VALIDATION CHECKLIST ----------------
     st.markdown("### 🧪 AI Output Validation Checklist")
 
     col1, col2 = st.columns(2)
@@ -225,9 +217,5 @@ Farmer Question:
         st.checkbox("Clear reasoning")
         st.checkbox("No unsafe recommendations")
         st.checkbox("Avoids over-generalization")
-
-    st.caption(
-        "This checklist is used to validate and improve prompt quality and model reliability."
-    )
 
     st.button("🔄 Start New Query", on_click=lambda: st.session_state.update(step=1))
