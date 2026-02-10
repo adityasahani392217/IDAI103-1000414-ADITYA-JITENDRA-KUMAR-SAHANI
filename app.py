@@ -20,7 +20,7 @@ if "GOOGLE_API_KEY" not in st.secrets:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 model = genai.GenerativeModel(
-    "models/gemini-pro",
+    "gemini-pro",
     generation_config={
         "temperature": 0.2,
         "max_output_tokens": 800
