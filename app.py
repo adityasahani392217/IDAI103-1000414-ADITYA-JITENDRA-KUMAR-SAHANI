@@ -22,9 +22,8 @@ if "GOOGLE_API_KEY" not in st.secrets:
     st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
     st.stop()
 
-client = genai.Client(
-    api_key=st.secrets["GEMINI_API_KEY"],
-)
+api_key = st.secrets["GOOGLE_API_KEY"]
+
 # Add this temporary button to your sidebar to check names
 
 # ---------------- HEADER ----------------
