@@ -18,6 +18,10 @@ st.set_page_config(
 # We force the 'v1' stable API version to resolve the 404 issue.
 # Change this in your CONFIG section
 # In your API KEY & CLIENT section
+if "GOOGLE_API_KEY" not in st.secrets:
+    st.error("⚠️ GOOGLE_API_KEY missing in Streamlit Secrets")
+    st.stop()
+
 client = genai.Client(
     api_key=st.secrets["GEMINI_API_KEY"],
 )
