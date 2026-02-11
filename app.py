@@ -23,7 +23,7 @@ st.markdown("""
     .stApp {
         background-color: #F9FFF9;
     }
-    p, li, div, span, .markdown-text-container, .stMarkdown, .stText, label {
+    p, li, div:not(.header-container):not(.sidebar-header):not(.title-text):not(.subtitle-text):not(.badge):not(.stButton > button):not(.stTabs [data-baseweb="tab"]):not(.footer) {
         color: #000000 !important;
     }
 
@@ -79,7 +79,7 @@ st.markdown("""
         text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
     }
 
-    /* ----- SIDEBAR – PERFECT ICON ALIGNMENT ----- */
+    /* ----- SIDEBAR – CRYSTAL CLEAR DROPDOWNS ----- */
     .sidebar .sidebar-content {
         background-color: var(--green);
         border-right: 8px solid var(--yellow);
@@ -95,7 +95,7 @@ st.markdown("""
     }
     .sidebar-header * { color: black !important; }
 
-    /* LABEL + ICON row – flex, centered */
+    /* ----- INPUT LABELS – ICON + TEXT, ABOVE THE WIDGET ----- */
     .input-label {
         display: flex;
         align-items: center;
@@ -104,6 +104,7 @@ st.markdown("""
         font-size: 1.1rem;
         color: white !important;
         margin-bottom: 6px;
+        padding-left: 4px;
     }
     .input-label i {
         font-size: 1.2rem;
@@ -112,22 +113,32 @@ st.markdown("""
         color: white !important;
     }
 
-    /* BIG, FRIENDLY INPUTS */
+    /* ----- BIG, VISIBLE WIDGETS ----- */
     div[data-baseweb="select"] > div,
     div[data-baseweb="input"] > div,
     div[data-baseweb="multiselect"] > div {
-        border-radius: 20px !important;
-        border-width: 4px !important;
         background-color: white !important;
-        font-size: 1.05rem !important;
+        border: 4px solid var(--orange) !important;
+        border-radius: 20px !important;
+        color: black !important;
         font-weight: 500 !important;
-        border-style: solid !important;
+        padding: 8px 16px !important;
+        margin-bottom: 16px !important;
+        box-shadow: none !important;
     }
-    div[data-baseweb="select"] > div { border-color: var(--orange) !important; }
-    div[data-baseweb="input"] > div { border-color: var(--blue) !important; }
-    div[data-baseweb="multiselect"] > div { border-color: var(--purple) !important; }
+    div[data-baseweb="select"] > div:hover,
+    div[data-baseweb="input"] > div:hover,
+    div[data-baseweb="multiselect"] > div:hover {
+        border-color: var(--red) !important;
+    }
+    /* Dropdown menu itself */
+    div[data-baseweb="select"] div[data-baseweb="popover"] {
+        background-color: white !important;
+        border: 3px solid var(--orange) !important;
+        border-radius: 15px !important;
+    }
 
-    /* ----- TABS – CLEAN, ICONS VIA CSS (NO RAW HTML) ----- */
+    /* ----- TABS – ICONS VIA CSS PSEUDO-ELEMENTS (NO RAW HTML) ----- */
     .stTabs [data-baseweb="tab-list"] {
         gap: 15px;
         background-color: var(--yellow);
@@ -154,7 +165,7 @@ st.markdown("""
         gap: 10px;
         white-space: nowrap;
     }
-    /* Add icons via pseudo-elements – perfectly aligned */
+    /* Add icons via pseudo-elements */
     .stTabs [data-baseweb="tab"]:nth-child(1)::before {
         font-family: "Font Awesome 6 Free";
         content: "\\f0ae";  /* list-check */
@@ -222,7 +233,6 @@ st.markdown("""
         font-size: 1.8rem;
         flex-shrink: 0;
         margin-top: 2px;
-        color: inherit;
     }
     .user-message p, .ai-message p {
         color: black !important;
@@ -342,10 +352,9 @@ st.markdown("""
         background-color: #FFD966 !important;
     }
 
-    /* ----- STREAMTRICK FIXES ----- */
-    .row-widget.stButton { margin-bottom: 0; }
-    .stSelectbox label, .stTextInput label, .stMultiSelect label {
-        display: none !important;  /* we use custom labels */
+    /* ----- STREAMLIT HIDDEN LABELS ----- */
+    .stSelectbox label, .stTextInput label, .stMultiSelect label, .stSlider label {
+        display: none !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -373,21 +382,21 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------- SIDEBAR (CUSTOM LABELS, PERFECT ALIGNMENT) ----------------
+# ---------------- SIDEBAR (CRYSTAL CLEAR DROPDOWNS) ----------------
 with st.sidebar:
     st.markdown('<div class="sidebar-header"><h3 style="margin:0;">🧑‍🌾 Your Farm Setup</h3></div>', unsafe_allow_html=True)
 
-    # ---- Region ----
-    st.markdown('<div class="input-label"><i class="fas fa-globe-americas"></i> Where is your farm?</div>', unsafe_allow_html=True)
+    # ---- REGION – FULLY VISIBLE, ICON INSIDE LABEL ----
+    st.markdown('<label class="input-label"><i class="fas fa-globe-americas"></i> Where is your farm?</label>', unsafe_allow_html=True)
     region = st.selectbox(
-        "region",  # hidden label
+        "region",
         ["India", "Ghana", "Canada", "USA", "Australia", "Brazil", "Kenya", "France"],
         label_visibility="collapsed",
         key="region_select"
     )
 
-    # ---- Location ----
-    st.markdown('<div class="input-label"><i class="fas fa-map-marker-alt"></i> State / Province</div>', unsafe_allow_html=True)
+    # ---- LOCATION ----
+    st.markdown('<label class="input-label"><i class="fas fa-map-marker-alt"></i> State / Province</label>', unsafe_allow_html=True)
     location = st.text_input(
         "location",
         placeholder="e.g. Punjab, Ontario...",
@@ -395,8 +404,8 @@ with st.sidebar:
         key="location_input"
     )
 
-    # ---- Crop Stage ----
-    st.markdown('<div class="input-label"><i class="fas fa-seedling"></i> Crop stage?</div>', unsafe_allow_html=True)
+    # ---- CROP STAGE ----
+    st.markdown('<label class="input-label"><i class="fas fa-seedling"></i> Crop stage?</label>', unsafe_allow_html=True)
     crop_stage_options = {
         "Planning": "📋 Planning",
         "Sowing": "🌱 Sowing",
@@ -412,8 +421,8 @@ with st.sidebar:
         key="crop_select"
     )
 
-    # ---- Priorities ----
-    st.markdown('<div class="input-label"><i class="fas fa-bullseye"></i> Your goals</div>', unsafe_allow_html=True)
+    # ---- PRIORITIES ----
+    st.markdown('<label class="input-label"><i class="fas fa-bullseye"></i> Your goals</label>', unsafe_allow_html=True)
     priority = st.multiselect(
         "priority",
         ["💧 Save Water", "📈 High Yield", "🌿 Organic", "💰 Low Cost", 
@@ -423,8 +432,8 @@ with st.sidebar:
         key="priority_multiselect"
     )
 
-    # ---- AI Creativity ----
-    st.markdown('<div class="input-label"><i class="fas fa-brain"></i> AI Creativity</div>', unsafe_allow_html=True)
+    # ---- AI CREATIVITY ----
+    st.markdown('<label class="input-label"><i class="fas fa-brain"></i> AI Creativity</label>', unsafe_allow_html=True)
     temperature = st.slider(
         "creativity",
         0.2, 0.9, 0.5,
@@ -502,7 +511,7 @@ with tab1:
             <p style="color:black;">{creativity_percent}%</p>
         </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
 
     # ---- Custom Prompt Expander ----
@@ -510,9 +519,9 @@ with tab1:
         st.markdown('<div class="prompt-editor">', unsafe_allow_html=True)
         st.info("Edit the prompt below. {placeholders} will be filled automatically.")
         default_rec_prompt = f"""You are an expert agricultural advisor. 
-Farmer location: {region}, {location if location else 'unknown'}.
-Current crop stage: {crop_stage}.
-Farmer priorities: {', '.join(priority) if priority else 'General'}.
+Farmer location: {{region}}, {{location}}.
+Current crop stage: {{crop_stage}}.
+Farmer priorities: {{priority}}.
 
 Give EXACTLY 3 farming recommendations in this format:
 
@@ -558,7 +567,10 @@ Use simple words, region-specific advice, and avoid unsafe chemicals."""
                             contents=prompt,
                             config={"temperature": temperature, "max_output_tokens": 1024}
                         )
-                        full_output = response.text if hasattr(response, "text") else "⚠️ No response."
+                        if hasattr(response, "text") and response.text:
+                            full_output = response.text
+                        else:
+                            full_output = "⚠️ Could not get advice. Try again."
                         st.session_state.full_output = full_output
                         st.session_state.show_recommendations = True
                 except Exception as e:
@@ -600,10 +612,10 @@ with tab2:
         st.info("This system prompt guides how the AI responds. {placeholders} are replaced with your farm data.")
         default_chat_prompt = f"""You are FarmaBuddy, a helpful farming assistant.
 Current farmer context:
-- Region: {region}
-- Location: {location if location else 'unknown'}
-- Crop stage: {crop_stage}
-- Priorities: {', '.join(priority) if priority else 'General'}
+- Region: {{region}}
+- Location: {{location}}
+- Crop stage: {{crop_stage}}
+- Priorities: {{priority}}
 
 Answer the user's question with:
 - Very simple, practical language
@@ -665,7 +677,10 @@ If the question is not about farming, politely redirect."""
                     contents=full_prompt,
                     config={"temperature": temperature, "max_output_tokens": 1024}
                 )
-                ai_reply = response.text if hasattr(response, "text") else "😕 I didn't get that. Please rephrase."
+                if hasattr(response, "text") and response.text:
+                    ai_reply = response.text
+                else:
+                    ai_reply = "😕 I didn't get that. Please rephrase."
                 st.session_state.chat_history.append({"role": "assistant", "content": ai_reply})
                 st.rerun()
         except Exception as e:
