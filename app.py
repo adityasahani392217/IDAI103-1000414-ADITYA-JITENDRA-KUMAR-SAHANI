@@ -693,7 +693,7 @@ with tab2:
     st.markdown('<p class="insight-text">Chat with FarmaBuddy AI to get instant answers to your specific farming questions.</p>', unsafe_allow_html=True)
     
     # Chat container
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    
     
     # Display chat history with black text
     for message in st.session_state.chat_history:
