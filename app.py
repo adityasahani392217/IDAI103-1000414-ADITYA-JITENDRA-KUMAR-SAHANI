@@ -77,7 +77,6 @@ st.markdown("""
     
     /* Button styling */
     .stButton > button {
-        width: 100%;
         background: linear-gradient(90deg, #4caf50 0%, #2e7d32 100%);
         color: white;
         border: none;
@@ -92,6 +91,25 @@ st.markdown("""
     .stButton > button:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+    
+    /* Chat message styling */
+    .user-message {
+        background: linear-gradient(90deg, #e8f5e9 0%, #f1f8e9 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 0.5rem 0;
+        border-left: 5px solid #4caf50;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .ai-message {
+        background: white;
+        padding: 1rem;
+        border-radius: 15px;
+        margin: 0.5rem 0;
+        border-left: 5px solid #81c784;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     /* Card styling for recommendations */
@@ -181,6 +199,16 @@ st.markdown("""
         border-left: 5px solid #f44336;
     }
     
+    /* Chat container */
+    .chat-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 1rem;
+        border-radius: 10px;
+        background: #f9fdf9;
+        border: 2px solid #e8f5e9;
+    }
+    
     /* BLACK TEXT STYLES FOR FARM DATA AND INSIGHTS */
     .black-text {
         color: #000000 !important;
@@ -215,6 +243,17 @@ st.markdown("""
         color: #2e7d32 !important;
         margin-top: 0;
         margin-bottom: 1rem;
+    }
+    
+    /* Chat text colors */
+    .user-message p {
+        color: #000000 !important;
+        font-weight: 500;
+    }
+    
+    .ai-message p {
+        color: #000000 !important;
+        line-height: 1.6;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -313,128 +352,243 @@ with st.sidebar:
     for p in priority:
         st.markdown(f'<span class="badge badge-primary">🎯 {p}</span>', unsafe_allow_html=True)
 
+# ---------------- INITIALIZE SESSION STATE ----------------
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+if 'full_output' not in st.session_state:
+    st.session_state.full_output = None
+if 'show_recommendations' not in st.session_state:
+    st.session_state.show_recommendations = False
+
 # ---------------- MAIN CONTENT AREA ----------------
-col1, col2 = st.columns([2, 1])
+tab1, tab2 = st.tabs(["🌾 Get Recommendations", "💬 Ask Questions"])
 
-with col1:
-    st.markdown("### 💡 Get AI-Powered Farming Advice")
+with tab1:
+    col1, col2 = st.columns([2, 1])
     
-    # Action button with enhanced styling
-    if st.button("🚀 Generate Smart Recommendations", use_container_width=True, key="generate_btn"):
-        if not location:
-            st.warning("📍 Please enter your location to get personalized recommendations")
-        else:
-            try:
-                with st.spinner("🤖 AI is analyzing your farm data..."):
-                    # Build prompt
-                    prompt = f"""
-                    You are a professional agricultural advisor helping farmers.
+    with col1:
+        st.markdown("### 💡 Get AI-Powered Farming Advice")
+        
+        # Action button with enhanced styling
+        if st.button("🚀 Generate Smart Recommendations", use_container_width=True, key="generate_btn"):
+            if not location:
+                st.warning("📍 Please enter your location to get personalized recommendations")
+            else:
+                try:
+                    with st.spinner("🤖 AI is analyzing your farm data..."):
+                        # Build prompt
+                        prompt = f"""
+                        You are a professional agricultural advisor helping farmers.
 
-                    Farmer Profile:
-                    Country/Region: {region}
-                    Location: {location}
-                    Crop Stage: {crop_stage}
-                    Priorities: {', '.join(priority) if priority else "General Best Practices"}
+                        Farmer Profile:
+                        Country/Region: {region}
+                        Location: {location}
+                        Crop Stage: {crop_stage}
+                        Priorities: {', '.join(priority) if priority else "General Best Practices"}
 
-                    INSTRUCTIONS:
-                    - Provide EXACTLY 3 clear farming recommendations.
-                    - Format each recommendation using this structure:
+                        INSTRUCTIONS:
+                        - Provide EXACTLY 3 clear farming recommendations.
+                        - Format each recommendation using this structure:
 
-                    Recommendation 1:
-                    • Action:
-                    • Why:
+                        Recommendation 1:
+                        • Action:
+                        • Why:
 
-                    Recommendation 2:
-                    • Action:
-                    • Why:
+                        Recommendation 2:
+                        • Action:
+                        • Why:
 
-                    Recommendation 3:
-                    • Action:
-                    • Why:
+                        Recommendation 3:
+                        • Action:
+                        • Why:
 
-                    - Keep language simple and practical.
-                    - Make advice region-specific.
-                    - Avoid unsafe chemical instructions.
-                    - Ensure full explanation.
-                    """
-                    
-                    # Get AI response
-                    response = client.models.generate_content(
-                        model="gemini-3-flash-preview",
-                        contents=prompt,
-                        config={
-                            "temperature": temperature,
-                            "max_output_tokens": 1024
-                        }
-                    )
-                    
-                    # Extract response
-                    if hasattr(response, "text") and response.text:
-                        full_output = response.text
-                    elif hasattr(response, "candidates"):
-                        try:
-                            full_output = response.candidates[0].content.parts[0].text
-                        except:
-                            full_output = "⚠️ Could not parse full response."
-                    else:
-                        full_output = "⚠️ No content returned."
-                    
-                    # Store in session state to display later
-                    st.session_state.full_output = full_output
-                    st.session_state.show_recommendations = True
-                    
-            except Exception as e:
-                st.error("⚠️ Service Temporarily Unavailable")
-                with st.expander("Technical Details"):
-                    st.code(str(e))
-    
-    # Display recommendations from session state (only if they exist)
-    if 'show_recommendations' in st.session_state and st.session_state.show_recommendations:
-        if 'full_output' in st.session_state and st.session_state.full_output:
-            full_output = st.session_state.full_output
-            st.success("✅ AI Recommendations Generated Successfully!")
-            st.markdown("---")
-            st.markdown("### 📋 Your Personalized Farming Plan")
-            
-            # Split recommendations and display in cards
-            recommendations = full_output.split('\n\n')
-            for i, rec in enumerate(recommendations[:3], 1):
-                if rec.strip():
-                    # Clean up the text
-                    cleaned_rec = rec.replace('•', '➤').replace('Recommendation', '').strip()
-                    st.markdown(f"""
-                    <div class="recommendation-card">
-                        <h4>📌 Recommendation {i}</h4>
-                        <div class="ai-content">
-                            {cleaned_rec}
+                        - Keep language simple and practical.
+                        - Make advice region-specific.
+                        - Avoid unsafe chemical instructions.
+                        - Ensure full explanation.
+                        """
+                        
+                        # Get AI response
+                        response = client.models.generate_content(
+                            model="gemini-3-flash-preview",
+                            contents=prompt,
+                            config={
+                                "temperature": temperature,
+                                "max_output_tokens": 1024
+                            }
+                        )
+                        
+                        # Extract response
+                        if hasattr(response, "text") and response.text:
+                            full_output = response.text
+                        elif hasattr(response, "candidates"):
+                            try:
+                                full_output = response.candidates[0].content.parts[0].text
+                            except:
+                                full_output = "⚠️ Could not parse full response."
+                        else:
+                            full_output = "⚠️ No content returned."
+                        
+                        # Store in session state to display later
+                        st.session_state.full_output = full_output
+                        st.session_state.show_recommendations = True
+                        
+                except Exception as e:
+                    st.error("⚠️ Service Temporarily Unavailable")
+                    with st.expander("Technical Details"):
+                        st.code(str(e))
+        
+        # Display recommendations from session state (only if they exist)
+        if 'show_recommendations' in st.session_state and st.session_state.show_recommendations:
+            if 'full_output' in st.session_state and st.session_state.full_output:
+                full_output = st.session_state.full_output
+                st.success("✅ AI Recommendations Generated Successfully!")
+                st.markdown("---")
+                st.markdown("### 📋 Your Personalized Farming Plan")
+                
+                # Split recommendations and display in cards
+                recommendations = full_output.split('\n\n')
+                for i, rec in enumerate(recommendations[:3], 1):
+                    if rec.strip():
+                        # Clean up the text
+                        cleaned_rec = rec.replace('•', '➤').replace('Recommendation', '').strip()
+                        st.markdown(f"""
+                        <div class="recommendation-card">
+                            <h4>📌 Recommendation {i}</h4>
+                            <div class="ai-content">
+                                {cleaned_rec}
+                            </div>
                         </div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("### 📈 Farm Insights")
+        
+        # Current farm status card
+        creativity_label = "Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"
+        
+        st.markdown(f"""
+        <div class="recommendation-card">
+            <h4>🏡 Current Farm Status</h4>
+            <p class="farm-data-text"><strong>Region:</strong> {region}</p>
+            <p class="farm-data-text"><strong>Stage:</strong> {crop_stage}</p>
+            <p class="farm-data-text"><strong>Priorities:</strong> {len(priority)}</p>
+            <p class="farm-data-text"><strong>AI Mode:</strong> {creativity_label}</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Best practices tip
+        st.markdown("""
+        <div class="recommendation-card">
+            <h4>💡 Pro Tip</h4>
+            <p class="insight-text">For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
+            <small class="insight-text">AI recommendations improve with accurate inputs.</small>
+        </div>
+        """, unsafe_allow_html=True)
 
-with col2:
-    st.markdown("### 📈 Farm Insights")
+with tab2:
+    st.markdown("### 💬 Ask Farming Questions")
+    st.markdown("Chat with FarmaBuddy AI to get answers to your specific farming questions.")
     
-    # Current farm status card
-    creativity_label = "Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"
+    # Chat container
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
-    st.markdown(f"""
-    <div class="recommendation-card">
-        <h4>🏡 Current Farm Status</h4>
-        <p class="farm-data-text"><strong>Region:</strong> {region}</p>
-        <p class="farm-data-text"><strong>Stage:</strong> {crop_stage}</p>
-        <p class="farm-data-text"><strong>Priorities:</strong> {len(priority)}</p>
-        <p class="farm-data-text"><strong>AI Mode:</strong> {creativity_label}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Display chat history
+    for message in st.session_state.chat_history:
+        if message["role"] == "user":
+            st.markdown(f"""
+            <div class="user-message">
+                <p><strong>👤 You:</strong> {message["content"]}</p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div class="ai-message">
+                <p><strong>🌱 FarmaBuddy:</strong> {message["content"]}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # Best practices tip
-    st.markdown("""
-    <div class="recommendation-card">
-        <h4>💡 Pro Tip</h4>
-        <p class="insight-text">For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
-        <small class="insight-text">AI recommendations improve with accurate inputs.</small>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Chat input
+    col_chat1, col_chat2 = st.columns([4, 1])
+    
+    with col_chat1:
+        user_question = st.text_input(
+            "Type your farming question here:",
+            placeholder="e.g., What are the best crops for Punjab in summer?",
+            label_visibility="collapsed",
+            key="chat_input"
+        )
+    
+    with col_chat2:
+        send_button = st.button("Send", use_container_width=True, key="send_btn")
+    
+    # Handle chat submission
+    if send_button and user_question:
+        # Add user message to chat history
+        st.session_state.chat_history.append({"role": "user", "content": user_question})
+        
+        try:
+            with st.spinner("🌱 AI is thinking..."):
+                # Build context-aware prompt
+                context_prompt = f"""
+                You are FarmaBuddy, a helpful farming assistant.
+                
+                Current Farmer Context:
+                - Region: {region}
+                - Location: {location}
+                - Crop Stage: {crop_stage}
+                - Priorities: {', '.join(priority) if priority else 'General farming'}
+                
+                User Question: {user_question}
+                
+                Instructions:
+                - Provide a clear, practical answer
+                - Consider the farmer's context above
+                - Keep response concise but informative
+                - Use simple language
+                - Focus on actionable advice
+                - If the question is outside farming, politely redirect
+                """
+                
+                # Get AI response
+                response = client.models.generate_content(
+                    model="gemini-3-flash-preview",
+                    contents=context_prompt,
+                    config={
+                        "temperature": temperature,
+                        "max_output_tokens": 1024
+                    }
+                )
+                
+                # Extract AI response
+                if hasattr(response, "text") and response.text:
+                    ai_response = response.text
+                elif hasattr(response, "candidates"):
+                    try:
+                        ai_response = response.candidates[0].content.parts[0].text
+                    except:
+                        ai_response = "I apologize, but I'm having trouble generating a response. Please try again."
+                else:
+                    ai_response = "I apologize, but I'm having trouble generating a response. Please try again."
+                
+                # Add AI response to chat history
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                
+                # Rerun to update the chat display
+                st.rerun()
+                
+        except Exception as e:
+            error_msg = "Sorry, I'm having trouble connecting to the AI service. Please try again later."
+            st.session_state.chat_history.append({"role": "assistant", "content": error_msg})
+            st.rerun()
+    
+    # Clear chat button
+    if st.session_state.chat_history:
+        if st.button("Clear Chat History", use_container_width=True, key="clear_chat"):
+            st.session_state.chat_history = []
+            st.rerun()
 
 # ---------------- FEEDBACK SECTION ----------------
 st.markdown("---")
@@ -468,7 +622,8 @@ log_data = {
     "Location": location or "Not specified",
     "Crop Stage": crop_stage,
     "Priorities": ", ".join(priority) if priority else "General",
-    "AI Creativity": f"{creativity_percent}%"
+    "AI Creativity": f"{creativity_percent}%",
+    "Chat Messages": len(st.session_state.chat_history)
 }
 
 # Display log in a nice dataframe
@@ -491,9 +646,3 @@ st.markdown("""
     </p>
 </div>
 """.format(current_date=datetime.now().strftime("%B %d, %Y")), unsafe_allow_html=True)
-
-# Initialize session state variables
-if 'full_output' not in st.session_state:
-    st.session_state.full_output = None
-if 'show_recommendations' not in st.session_state:
-    st.session_state.show_recommendations = False
