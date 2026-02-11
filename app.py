@@ -49,19 +49,40 @@ temperature = st.sidebar.slider("AI Creativity Level", 0.2, 0.9, 0.5)
 # ---------------- PROMPT ENGINE ----------------
 def build_prompt():
     return f"""
-You are an expert agricultural advisor.
-Farmer details:
-Region: {region}
-Location: {location}
-Crop stage: {crop_stage}
-Priorities: {', '.join(priority)}
+You are a senior agricultural scientist providing practical farming advice.
 
-Task:
-1. Give 3 clear farming recommendations.
-2. Format as bullet points.
-3. After each recommendation, explain WHY it is useful.
-4. Keep language simple and practical.
+FARMER PROFILE:
+Country/Region: {region}
+State/Location: {location}
+Crop Stage: {crop_stage}
+Priorities: {', '.join(priority) if priority else "No specific priority mentioned"}
+
+INSTRUCTIONS:
+1. Give exactly 3 recommendations.
+2. Each recommendation must include:
+   - Clear Action (what to do)
+   - Short Reason (why it works)
+3. Use bullet points.
+4. Keep language simple and farmer-friendly.
+5. Make advice specific to the region and crop stage.
+6. Avoid unsafe chemical dosages.
+7. Do not give generic advice.
+
+FORMAT STRICTLY LIKE THIS:
+
+### Recommendation 1
+• Action: ...
+• Why: ...
+
+### Recommendation 2
+• Action: ...
+• Why: ...
+
+### Recommendation 3
+• Action: ...
+• Why: ...
 """
+
 
 # ---------------- MAIN ACTION ----------------
 if st.button("🌾 Get Smart Advice"):
@@ -69,7 +90,7 @@ if st.button("🌾 Get Smart Advice"):
         st.warning("Please enter your location.")
     else:
         response = client.models.generate_content(
-        model="gemini-1.5-flash",                # <--- UPDATE THIS
+        model="gemini-3-flash-preview",                # <--- UPDATE THIS
         contents=build_prompt(),
         config={"temperature": temperature, "max_output_tokens": 512}
         )
