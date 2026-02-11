@@ -11,17 +11,23 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------- FONT AWESOME 6 (FREE) + VIBRANT SOLID CSS ----------
+# ---------- FONT AWESOME + ULTRA CLEAN CSS ----------
 st.markdown("""
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-    /* 🎯 GLOBAL: ALL CONTENT TEXT = BLACK */
-    * { font-family: 'Segoe UI', Roboto, sans-serif; }
-    p, li, div:not(.header-container):not(.sidebar-header):not(.title-text):not(.subtitle-text):not(.badge):not(.stButton > button):not(.stTabs [data-baseweb="tab"]):not(.footer) {
+    /* ----- GLOBAL: BLACK TEXT, NO FUNNY STYLES ----- */
+    * {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        box-sizing: border-box;
+    }
+    .stApp {
+        background-color: #F9FFF9;
+    }
+    p, li, div, span, .markdown-text-container, .stMarkdown, .stText, label {
         color: #000000 !important;
     }
 
-    /* 🌈 SOLID COLOR PALETTE */
+    /* ----- VIBRANT SOLID COLOR PALETTE ----- */
     :root {
         --green: #2E7D32;
         --orange: #FF8C42;
@@ -34,16 +40,14 @@ st.markdown("""
         --black: #000000;
     }
 
-    .stApp { background-color: var(--light-bg); }
-
-    /* 🧢 HEADER – BIG, BOLD, PERFECTLY ALIGNED */
+    /* ----- HEADER – BOLD, CLEAN ----- */
     .header-container {
         background-color: var(--green);
-        padding: 2rem 2rem;
+        padding: 2rem 2.5rem;
         border-radius: 30px 30px 30px 0;
         margin-bottom: 2rem;
         border: 6px solid var(--yellow);
-        box-shadow: 12px 12px 0 rgba(0,0,0,0.1);
+        box-shadow: 12px 12px 0 rgba(0,0,0,0.08);
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -55,7 +59,7 @@ st.markdown("""
         text-align: center;
         font-size: 5rem;
         color: var(--yellow);
-        text-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+        text-shadow: 6px 6px 0 rgba(0,0,0,0.1);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -65,54 +69,223 @@ st.markdown("""
         font-weight: 900 !important;
         color: white !important;
         margin-bottom: 0.2rem !important;
-        text-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+        text-shadow: 6px 6px 0 rgba(0,0,0,0.1);
         line-height: 1.2;
     }
     .subtitle-text {
         font-size: 1.6rem !important;
         font-weight: 700 !important;
         color: var(--yellow) !important;
-        text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+        text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
     }
 
-    /* 🧑‍🌾 SIDEBAR – FARM TOOLBAR */
-    .sidebar .sidebar-content { background-color: var(--green); border-right: 8px solid var(--yellow); }
+    /* ----- SIDEBAR – PERFECT ICON ALIGNMENT ----- */
+    .sidebar .sidebar-content {
+        background-color: var(--green);
+        border-right: 8px solid var(--yellow);
+        padding-top: 1.5rem;
+    }
     .sidebar-header {
         background-color: var(--yellow);
         padding: 1.2rem;
         border-radius: 20px;
         margin-bottom: 1.5rem;
         border: 4px solid white;
-        color: black !important;
         text-align: center;
     }
     .sidebar-header * { color: black !important; }
 
-    /* 🎛️ INPUTS – BIG, FRIENDLY */
+    /* LABEL + ICON row – flex, centered */
+    .input-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: white !important;
+        margin-bottom: 6px;
+    }
+    .input-label i {
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+        color: white !important;
+    }
+
+    /* BIG, FRIENDLY INPUTS */
     div[data-baseweb="select"] > div,
     div[data-baseweb="input"] > div,
     div[data-baseweb="multiselect"] > div {
         border-radius: 20px !important;
         border-width: 4px !important;
         background-color: white !important;
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 500 !important;
+        border-style: solid !important;
     }
     div[data-baseweb="select"] > div { border-color: var(--orange) !important; }
     div[data-baseweb="input"] > div { border-color: var(--blue) !important; }
     div[data-baseweb="multiselect"] > div { border-color: var(--purple) !important; }
 
-    /* 🚜 BUTTONS – JUMBO, CENTERED ICONS */
+    /* ----- TABS – CLEAN, ICONS VIA CSS (NO RAW HTML) ----- */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 15px;
+        background-color: var(--yellow);
+        padding: 12px;
+        border-radius: 60px;
+        border: 4px solid white;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 70px;
+        background-color: white !important;
+        border-radius: 50px !important;
+        color: black !important;
+        font-weight: 800 !important;
+        font-size: 1.2rem !important;
+        border: 4px solid var(--green) !important;
+        padding: 0 2rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px;
+        white-space: nowrap;
+    }
+    /* Add icons via pseudo-elements – perfectly aligned */
+    .stTabs [data-baseweb="tab"]:nth-child(1)::before {
+        font-family: "Font Awesome 6 Free";
+        content: "\\f0ae";  /* list-check */
+        font-weight: 900;
+        font-size: 1.4rem;
+        margin-right: 6px;
+        color: var(--green);
+    }
+    .stTabs [data-baseweb="tab"]:nth-child(2)::before {
+        font-family: "Font Awesome 6 Free";
+        content: "\\f544";  /* robot */
+        font-weight: 900;
+        font-size: 1.4rem;
+        margin-right: 6px;
+        color: var(--green);
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: var(--green) !important;
+        color: white !important;
+        border-color: var(--yellow) !important;
+    }
+    .stTabs [aria-selected="true"]::before {
+        color: white !important;
+    }
+
+    /* ----- CARDS – CLEAN SHADOW, GOOD SPACING ----- */
+    .recommendation-card {
+        background-color: white;
+        border-radius: 30px 30px 30px 0;
+        padding: 1.8rem 2rem;
+        margin: 1.5rem 0;
+        border-left: 12px solid var(--green);
+        box-shadow: 12px 12px 0 rgba(46,125,50,0.12);
+        transition: all 0.2s;
+    }
+    .recommendation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 16px 16px 0 rgba(46,125,50,0.18);
+    }
+    .recommendation-card h4 {
+        color: var(--green) !important;
+        font-size: 1.7rem !important;
+        font-weight: 800 !important;
+        border-bottom: 4px dashed var(--yellow);
+        padding-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* ----- CHAT BUBBLES – ICON & TEXT VERTICAL ALIGNED ----- */
+    .user-message, .ai-message {
+        padding: 1.2rem 1.8rem;
+        border-radius: 40px 40px 40px 0;
+        margin: 1rem 0;
+        border: 4px solid white;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.08);
+        max-width: 85%;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .user-message i, .ai-message i {
+        font-size: 1.8rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: inherit;
+    }
+    .user-message p, .ai-message p {
+        color: black !important;
+        font-weight: 500;
+        margin: 0;
+        flex: 1;
+        line-height: 1.5;
+    }
+    .user-message {
+        background-color: #D4EDF7;
+        border-left: 12px solid var(--blue);
+        margin-left: auto;
+    }
+    .ai-message {
+        background-color: #E2F3E2;
+        border-left: 12px solid var(--green);
+    }
+
+    /* ----- BADGES – ICON + TEXT INLINE, CENTERED ----- */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin: 0.25rem;
+        border: 3px solid white;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+        background-color: var(--orange);
+        color: white !important;
+    }
+    .badge i { font-size: 1.1rem; }
+
+    /* ----- FARM TILES – CLEAN, CENTERED ----- */
+    .farm-tile {
+        background-color: white;
+        border-radius: 20px;
+        padding: 1.4rem 0.5rem;
+        border-bottom: 10px solid var(--yellow);
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.06);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        height: 100%;
+    }
+    .farm-tile i { font-size: 2.8rem; color: var(--green); }
+    .farm-tile h3 { color: var(--green); font-weight: 800; margin: 0; font-size: 1.4rem; }
+    .farm-tile p { margin: 0; font-size: 0.9rem; }
+
+    /* ----- BUTTONS – JUMBO, ICON LEFT, TEXT CENTERED ----- */
     .stButton > button {
         background-color: var(--orange) !important;
         color: white !important;
-        border: none !important;
-        border-radius: 40px !important;
-        padding: 1rem 1.5rem !important;
+        border: 4px solid white !important;
+        border-radius: 50px !important;
+        padding: 0.9rem 1.8rem !important;
         font-weight: 800 !important;
         font-size: 1.3rem !important;
-        border: 4px solid white !important;
-        box-shadow: 8px 8px 0 rgba(0,0,0,0.2) !important;
+        box-shadow: 8px 8px 0 rgba(0,0,0,0.1) !important;
         transition: all 0.1s ease !important;
         width: 100%;
         display: flex;
@@ -123,143 +296,11 @@ st.markdown("""
     .stButton > button i { font-size: 1.4rem; }
     .stButton > button:hover {
         transform: translateY(-4px);
-        box-shadow: 12px 12px 0 rgba(0,0,0,0.2) !important;
+        box-shadow: 12px 12px 0 rgba(0,0,0,0.15) !important;
         background-color: var(--red) !important;
     }
 
-    /* 🎴 CARDS – WITH PERFECT ICON ALIGNMENT */
-    .recommendation-card {
-        background-color: white;
-        border-radius: 30px 30px 30px 0;
-        padding: 2rem;
-        margin: 1.5rem 0;
-        border-left: 12px solid var(--green);
-        box-shadow: 12px 12px 0 rgba(46,125,50,0.2);
-        transition: all 0.2s;
-    }
-    .recommendation-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 16px 16px 0 rgba(46,125,50,0.25);
-    }
-    .recommendation-card h4 {
-        color: var(--green) !important;
-        font-size: 1.8rem !important;
-        font-weight: 800 !important;
-        border-bottom: 4px dashed var(--yellow);
-        padding-bottom: 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    /* 💬 CHAT BUBBLES – BLACK TEXT, ALIGNED ICONS */
-    .user-message, .ai-message {
-        padding: 1.2rem 1.8rem;
-        border-radius: 40px 40px 40px 0;
-        margin: 1rem 0;
-        border: 4px solid white;
-        box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
-        max-width: 85%;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    .user-message i, .ai-message i { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
-    .user-message p, .ai-message p {
-        color: black !important;
-        font-weight: 500;
-        margin: 0;
-        flex: 1;
-    }
-    .user-message { background-color: #D4EDF7; border-left: 12px solid var(--blue); margin-left: auto; }
-    .ai-message { background-color: #E2F3E2; border-left: 12px solid var(--green); }
-
-    /* 🏷️ BADGES – COLORFUL, ICONS INLINE */
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 0.6rem 1.2rem;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 700;
-        margin: 0.3rem;
-        border: 3px solid white;
-        box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-        background-color: var(--orange);
-        color: white !important;
-    }
-    .badge i { font-size: 1.2rem; }
-
-    /* 📊 FARM TILES – ICON ABOVE TEXT */
-    .farm-tile {
-        background-color: white;
-        border-radius: 20px;
-        padding: 1.5rem;
-        border-bottom: 10px solid var(--yellow);
-        box-shadow: 8px 8px 0 rgba(0,0,0,0.08);
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-    }
-    .farm-tile i { font-size: 3rem; color: var(--green); }
-    .farm-tile h3 { color: var(--green); font-weight: 800; margin: 0; }
-
-    /* 📱 TABS – GIANT, ICON + TEXT ALIGNED */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 15px;
-        background-color: var(--yellow);
-        padding: 15px;
-        border-radius: 60px;
-        border: 4px solid white;
-        box-shadow: 8px 8px 0 rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-        display: flex;
-        flex-wrap: wrap;
-    }
-    .stTabs [data-baseweb="tab"] {
-        height: 80px;
-        background-color: white !important;
-        border-radius: 50px !important;
-        color: black !important;
-        font-weight: 800 !important;
-        font-size: 1.3rem !important;
-        border: 4px solid var(--green) !important;
-        padding: 0 2rem !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        white-space: nowrap;
-    }
-    .stTabs [data-baseweb="tab"] i { font-size: 1.6rem; }
-    .stTabs [aria-selected="true"] {
-        background-color: var(--green) !important;
-        color: white !important;
-        border-color: var(--yellow) !important;
-    }
-
-    /* 🔍 CUSTOM PROMPT EXPANDER */
-    .prompt-editor {
-        background-color: #FFF9E6;
-        border-left: 8px solid var(--yellow);
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin-top: 1rem;
-        border: 2px solid var(--yellow);
-    }
-    .prompt-editor textarea {
-        border: 3px solid var(--green);
-        border-radius: 15px;
-        font-size: 1rem;
-        width: 100%;
-        padding: 0.8rem;
-    }
-
-    /* 🦶 FOOTER */
+    /* ----- FOOTER – CLEAN & BRIGHT ----- */
     .footer {
         background-color: var(--green);
         padding: 2rem;
@@ -270,26 +311,53 @@ st.markdown("""
         margin-top: 3rem;
     }
     .footer * { color: white !important; }
-    .footer i { margin: 0 8px; }
+    .footer i { margin: 0 10px; font-size: 1.5rem; }
 
-    /* ℹ️ TOOLTIP */
-    .tooltip-icon {
-        font-size: 1.2rem;
-        color: var(--yellow);
-        margin-left: 5px;
-        cursor: help;
+    /* ----- CUSTOM PROMPT EDITOR ----- */
+    .prompt-editor {
+        background-color: #FFF9E6;
+        border-left: 8px solid var(--yellow);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        border: 2px solid var(--yellow);
+    }
+    textarea {
+        border: 3px solid var(--green) !important;
+        border-radius: 15px !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* ----- FEEDBACK EMOJIS – BIG & CENTERED ----- */
+    .stButton button[key*="fb"] {
+        font-size: 2.2rem !important;
+        padding: 0.3rem !important;
+        background-color: var(--yellow) !important;
+        color: black !important;
+        border: 3px solid white !important;
+        box-shadow: 4px 4px 0 rgba(0,0,0,0.1) !important;
+    }
+    .stButton button[key*="fb"]:hover {
+        transform: scale(1.1);
+        background-color: #FFD966 !important;
+    }
+
+    /* ----- STREAMTRICK FIXES ----- */
+    .row-widget.stButton { margin-bottom: 0; }
+    .stSelectbox label, .stTextInput label, .stMultiSelect label {
+        display: none !important;  /* we use custom labels */
     }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- API KEY & CLIENT ----------------
+# ---------------- API KEY ----------------
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("🔐 API Key Missing - Please add GOOGLE_API_KEY to Streamlit Secrets")
     st.stop()
 api_key = st.secrets["GOOGLE_API_KEY"]
 client = genai.Client(api_key=api_key)
 
-# ---------------- HEADER (ICON PERFECTLY CENTERED) ----------------
+# ---------------- HEADER ----------------
 st.markdown("""
 <div class="header-container">
     <div class="header-text">
@@ -305,25 +373,30 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------- SIDEBAR ----------------
+# ---------------- SIDEBAR (CUSTOM LABELS, PERFECT ALIGNMENT) ----------------
 with st.sidebar:
-    st.markdown('<div class="sidebar-header">', unsafe_allow_html=True)
-    st.markdown("### 🧑‍🌾 **Your Farm Setup**")
-    st.markdown("</div>", unsafe_allow_html=True)
-    
+    st.markdown('<div class="sidebar-header"><h3 style="margin:0;">🧑‍🌾 Your Farm Setup</h3></div>', unsafe_allow_html=True)
+
+    # ---- Region ----
+    st.markdown('<div class="input-label"><i class="fas fa-globe-americas"></i> Where is your farm?</div>', unsafe_allow_html=True)
     region = st.selectbox(
-        "<i class='fas fa-globe-americas'></i> **Where is your farm?**" ,
+        "region",  # hidden label
         ["India", "Ghana", "Canada", "USA", "Australia", "Brazil", "Kenya", "France"],
-        help="Choose your country",
-        format_func=lambda x: f"🌍 {x}"
+        label_visibility="collapsed",
+        key="region_select"
     )
-    
+
+    # ---- Location ----
+    st.markdown('<div class="input-label"><i class="fas fa-map-marker-alt"></i> State / Province</div>', unsafe_allow_html=True)
     location = st.text_input(
-        "📍 **State / Province**",
+        "location",
         placeholder="e.g. Punjab, Ontario...",
-        help="Your local area"
+        label_visibility="collapsed",
+        key="location_input"
     )
-    
+
+    # ---- Crop Stage ----
+    st.markdown('<div class="input-label"><i class="fas fa-seedling"></i> Crop stage?</div>', unsafe_allow_html=True)
     crop_stage_options = {
         "Planning": "📋 Planning",
         "Sowing": "🌱 Sowing",
@@ -332,35 +405,42 @@ with st.sidebar:
         "Post-Harvest": "🏭 Storage"
     }
     crop_stage = st.selectbox(
-        "🌱 **Crop stage?**",
+        "crop",
         list(crop_stage_options.keys()),
         format_func=lambda x: crop_stage_options[x],
-        help="What's happening now?"
+        label_visibility="collapsed",
+        key="crop_select"
     )
-    
+
+    # ---- Priorities ----
+    st.markdown('<div class="input-label"><i class="fas fa-bullseye"></i> Your goals</div>', unsafe_allow_html=True)
     priority = st.multiselect(
-        "🎯 **Your goals**",
+        "priority",
         ["💧 Save Water", "📈 High Yield", "🌿 Organic", "💰 Low Cost", 
          "🛡️ Pest Control", "🌱 Soil Health", "🚜 Automation", "♻️ Sustainability"],
         default=["📈 High Yield"],
-        help="Pick what matters most"
-    )
-    
-    st.markdown("**🤖 AI Creativity**")
-    temperature = st.slider(
-        "creativity", 0.2, 0.9, 0.5, 
         label_visibility="collapsed",
+        key="priority_multiselect"
+    )
+
+    # ---- AI Creativity ----
+    st.markdown('<div class="input-label"><i class="fas fa-brain"></i> AI Creativity</div>', unsafe_allow_html=True)
+    temperature = st.slider(
+        "creativity",
+        0.2, 0.9, 0.5,
+        label_visibility="collapsed",
+        key="temp_slider",
         help="More creative = surprising ideas, Consistent = safe advice"
     )
     creativity_percent = int((temperature - 0.2) / 0.7 * 100)
     st.markdown(f"""
-    <div style="background: #FFBE0B; padding: 0.8rem; border-radius: 30px; text-align: center; border:4px solid white;">
+    <div style="background: #FFBE0B; padding: 0.8rem; border-radius: 30px; text-align: center; border:4px solid white; margin-top: 0.5rem;">
         <span style="font-weight:800; font-size:1.4rem; color:black;">✨ {creativity_percent}% creative</span>
     </div>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
-    st.markdown("### 📋 **Your summary**")
+    st.markdown("### 📋 Your summary")
     cols = st.columns(2)
     with cols[0]:
         if location:
@@ -382,15 +462,12 @@ if 'custom_rec_prompt' not in st.session_state:
 if 'custom_chat_prompt' not in st.session_state:
     st.session_state.custom_chat_prompt = ""
 
-# ---------------- TABS (ICON + TEXT ALIGNED) ----------------
-tab1, tab2 = st.tabs([
-    "🌾 **GET ADVICE**  <i class='fas fa-list-check' style='margin-left:8px;'></i>",
-    "💬 **ASK FARM BOT**  <i class='fas fa-robot' style='margin-left:8px;'></i>"
-])
+# ---------------- TABS (NO RAW HTML, ICONS VIA CSS) ----------------
+tab1, tab2 = st.tabs(["GET ADVICE", "ASK FARM BOT"])
 
 # ========== TAB 1: RECOMMENDATIONS ==========
 with tab1:
-    st.markdown("## 🚜 **Your Farm Dashboard**")
+    st.markdown("## 🚜 Your Farm Dashboard")
     col_tile1, col_tile2, col_tile3, col_tile4 = st.columns(4)
     with col_tile1:
         st.markdown(f"""
@@ -427,20 +504,20 @@ with tab1:
         """, unsafe_allow_html=True)
     
     st.markdown("---")
-    
-    # --- CUSTOM PROMPT OPTION FOR RECOMMENDATIONS ---
-    with st.expander("🛠️ **Advanced: Customize the recommendation prompt**"):
+
+    # ---- Custom Prompt Expander ----
+    with st.expander("🛠️ Advanced: Customize recommendation prompt"):
         st.markdown('<div class="prompt-editor">', unsafe_allow_html=True)
-        st.info("Edit the prompt below to change how AI generates advice. The {placeholders} will be filled automatically.")
+        st.info("Edit the prompt below. {placeholders} will be filled automatically.")
         default_rec_prompt = f"""You are an expert agricultural advisor. 
 Farmer location: {region}, {location if location else 'unknown'}.
 Current crop stage: {crop_stage}.
 Farmer priorities: {', '.join(priority) if priority else 'General'}.
 
-Give EXACTLY 3 farming recommendations in this strict format:
+Give EXACTLY 3 farming recommendations in this format:
 
 Recommendation 1:
-• Action: (one clear sentence)
+• Action: (clear, one sentence)
 • Why: (one sentence)
 
 Recommendation 2:
@@ -453,59 +530,51 @@ Recommendation 3:
 
 Use simple words, region-specific advice, and avoid unsafe chemicals."""
         st.session_state.custom_rec_prompt = st.text_area(
-            "✏️ Edit recommendation prompt",
+            "Edit prompt",
             value=st.session_state.custom_rec_prompt or default_rec_prompt,
-            height=300,
+            height=280,
             label_visibility="collapsed"
         )
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([2,1])
+
+    # ---- Generate Button ----
+    col1, col2 = st.columns([2, 1])
     with col1:
-        if st.button("🚜 **GENERATE FARM PLAN**", use_container_width=True, key="gen_btn"):
+        if st.button("🚜 GENERATE FARM PLAN", use_container_width=True, key="gen_btn"):
             if not location:
                 st.warning("📍 Please enter your location first")
             else:
                 try:
                     with st.spinner("🌿 AI is analyzing your farm..."):
-                        # Use custom prompt if provided, else default
-                        if st.session_state.custom_rec_prompt.strip():
-                            prompt = st.session_state.custom_rec_prompt.format(
-                                region=region,
-                                location=location,
-                                crop_stage=crop_stage,
-                                priority=', '.join(priority) if priority else 'General'
-                            )
-                        else:
-                            # fallback to built-in enhanced prompt
-                            prompt = default_rec_prompt
-                        
+                        prompt = st.session_state.custom_rec_prompt or default_rec_prompt
+                        prompt = prompt.format(
+                            region=region,
+                            location=location,
+                            crop_stage=crop_stage,
+                            priority=', '.join(priority) if priority else 'General'
+                        )
                         response = client.models.generate_content(
                             model="gemini-3-flash-preview",
                             contents=prompt,
                             config={"temperature": temperature, "max_output_tokens": 1024}
                         )
-                        if hasattr(response, "text") and response.text:
-                            full_output = response.text
-                        else:
-                            full_output = "⚠️ Could not get advice. Please try again."
+                        full_output = response.text if hasattr(response, "text") else "⚠️ No response."
                         st.session_state.full_output = full_output
                         st.session_state.show_recommendations = True
                 except Exception as e:
-                    st.error("⚠️ AI service busy. Please try later.")
-    
+                    st.error("⚠️ AI service busy. Try again.")
     with col2:
         st.markdown("""
         <div style="background-color: #FFBE0B; border-radius: 30px; padding: 1rem; text-align: center; border:4px solid white;">
             <i class="fas fa-lightbulb" style="font-size:2rem; color:black;"></i>
-            <p style="color:black; font-weight:700;">Tap to get advice</p>
+            <p style="color:black; font-weight:700; margin:0;">Tap to get advice</p>
         </div>
         """, unsafe_allow_html=True)
-    
-    # Display recommendations
+
+    # ---- Display Recommendations ----
     if st.session_state.show_recommendations and st.session_state.full_output:
-        st.success("✅ **Your personalized farm plan is ready!**")
-        st.markdown("## 📋 **3 STEPS TO A BETTER HARVEST**")
+        st.success("✅ Your personalized farm plan is ready!")
+        st.markdown("## 📋 3 STEPS TO A BETTER HARVEST")
         recs = st.session_state.full_output.split('\n\n')
         icons = ["1️⃣", "2️⃣", "3️⃣"]
         for i, rec in enumerate(recs[:3], 1):
@@ -520,15 +589,15 @@ Use simple words, region-specific advice, and avoid unsafe chemicals."""
                 </div>
                 """, unsafe_allow_html=True)
 
-# ========== TAB 2: CHAT WITH AI ==========
+# ========== TAB 2: CHAT ==========
 with tab2:
-    st.markdown("## 💬 **Chat with FarmaBuddy**")
-    st.markdown('<p style="font-size:1.3rem; color:black;"><i class="fas fa-comment-dots"></i> Ask anything – pests, fertilizers, weather...</p>', unsafe_allow_html=True)
-    
-    # --- CUSTOM PROMPT OPTION FOR CHAT ---
-    with st.expander("🛠️ **Advanced: Customize the chat system prompt**"):
+    st.markdown("## 💬 Chat with FarmaBuddy")
+    st.markdown('<p style="font-size:1.2rem; color:black;"><i class="fas fa-comment-dots"></i> Ask anything – pests, fertilizers, weather...</p>', unsafe_allow_html=True)
+
+    # ---- Custom Chat Prompt ----
+    with st.expander("🛠️ Advanced: Customize chat AI prompt"):
         st.markdown('<div class="prompt-editor">', unsafe_allow_html=True)
-        st.info("Edit the system prompt below. This guides how the AI responds. The {placeholders} will be replaced with your farm context.")
+        st.info("This system prompt guides how the AI responds. {placeholders} are replaced with your farm data.")
         default_chat_prompt = f"""You are FarmaBuddy, a helpful farming assistant.
 Current farmer context:
 - Region: {region}
@@ -541,18 +610,17 @@ Answer the user's question with:
 - Short sentences
 - No unsafe chemicals
 - Focus on actionable advice
-If the question is not about farming, politely redirect.
-"""
+If the question is not about farming, politely redirect."""
         st.session_state.custom_chat_prompt = st.text_area(
-            "✏️ Edit system prompt",
+            "Edit system prompt",
             value=st.session_state.custom_chat_prompt or default_chat_prompt,
-            height=250,
+            height=220,
             label_visibility="collapsed",
-            key="chat_prompt_area"
+            key="chat_prompt_edit"
         )
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Chat container
+
+    # ---- Chat Container ----
     chat_container = st.container()
     with chat_container:
         st.markdown('<div style="background: #F0F7F0; border-radius: 40px; padding: 1.5rem;">', unsafe_allow_html=True)
@@ -572,79 +640,56 @@ If the question is not about farming, politely redirect.
                 </div>
                 ''', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Input area
-    col_in1, col_in2 = st.columns([5,1])
+
+    # ---- Input & Send ----
+    col_in1, col_in2 = st.columns([5, 1])
     with col_in1:
-        user_q = st.text_input("", placeholder="💭 Type your farming question here...", label_visibility="collapsed", key="chat_in")
+        user_q = st.text_input("", placeholder="💭 Type your farming question...", label_visibility="collapsed", key="chat_input")
     with col_in2:
-        send_click = st.button("📤 **SEND**", use_container_width=True, key="send_chat")
-    
+        send_click = st.button("📤 SEND", use_container_width=True, key="send_btn")
+
     if send_click and user_q:
         st.session_state.chat_history.append({"role": "user", "content": user_q})
         try:
             with st.spinner("🌱 AI is answering..."):
-                # Build final prompt: system prompt + user question
-                if st.session_state.custom_chat_prompt.strip():
-                    system_prompt = st.session_state.custom_chat_prompt.format(
-                        region=region,
-                        location=location if location else 'unknown',
-                        crop_stage=crop_stage,
-                        priority=', '.join(priority) if priority else 'General'
-                    )
-                else:
-                    system_prompt = default_chat_prompt.format(
-                        region=region,
-                        location=location if location else 'unknown',
-                        crop_stage=crop_stage,
-                        priority=', '.join(priority) if priority else 'General'
-                    )
-                full_chat_prompt = f"{system_prompt}\n\nUser question: {user_q}"
-                
+                system_prompt = st.session_state.custom_chat_prompt or default_chat_prompt
+                system_prompt = system_prompt.format(
+                    region=region,
+                    location=location if location else 'unknown',
+                    crop_stage=crop_stage,
+                    priority=', '.join(priority) if priority else 'General'
+                )
+                full_prompt = f"{system_prompt}\n\nUser question: {user_q}"
                 response = client.models.generate_content(
                     model="gemini-3-flash-preview",
-                    contents=full_chat_prompt,
+                    contents=full_prompt,
                     config={"temperature": temperature, "max_output_tokens": 1024}
                 )
-                if hasattr(response, "text") and response.text:
-                    ai_reply = response.text
-                else:
-                    ai_reply = "😕 I didn't quite get that. Can you ask in another way?"
+                ai_reply = response.text if hasattr(response, "text") else "😕 I didn't get that. Please rephrase."
                 st.session_state.chat_history.append({"role": "assistant", "content": ai_reply})
                 st.rerun()
         except Exception as e:
-            st.session_state.chat_history.append({"role": "assistant", "content": "⚠️ AI service is busy. Please try again later."})
+            st.session_state.chat_history.append({"role": "assistant", "content": "⚠️ AI service is busy. Try again."})
             st.rerun()
-    
+
     if st.session_state.chat_history:
-        if st.button("🗑️ **Clear chat**", use_container_width=True, key="clear_chat"):
+        if st.button("🗑️ Clear chat", use_container_width=True, key="clear_chat"):
             st.session_state.chat_history = []
             st.rerun()
 
 # ---------------- FEEDBACK (EMOJI ONLY) ----------------
 st.markdown("---")
-st.markdown("## 👍 **How was your experience?**")
-col_f1, col_f2, col_f3, col_f4, col_f5 = st.columns(5)
-with col_f1:
-    if st.button("😞", use_container_width=True, key="fb1"):
-        st.toast("Thank you for feedback!")
-with col_f2:
-    if st.button("🙁", use_container_width=True, key="fb2"):
-        st.toast("We'll improve!")
-with col_f3:
-    if st.button("😐", use_container_width=True, key="fb3"):
-        st.balloons()
-with col_f4:
-    if st.button("🙂", use_container_width=True, key="fb4"):
-        st.balloons()
-with col_f5:
-    if st.button("😍", use_container_width=True, key="fb5"):
-        st.balloons()
-        st.snow()
+st.markdown("## 👍 How was your experience?")
+cols = st.columns(5)
+emojis = ["😞", "🙁", "😐", "🙂", "😍"]
+for i, emoji in enumerate(emojis, 1):
+    with cols[i-1]:
+        if st.button(emoji, key=f"fb{i}"):
+            st.balloons() if i >= 3 else st.toast("Thank you!")
 
 # ---------------- SESSION LOG ----------------
 st.markdown("---")
-st.markdown("## 📊 **Today's activity**")
+st.markdown("## 📊 Today's activity")
 log_data = {
     "Time": datetime.now().strftime("%H:%M"),
     "Region": region,
@@ -653,16 +698,15 @@ log_data = {
     "Goals": len(priority),
     "Chats": len(st.session_state.chat_history)
 }
-df_log = pd.DataFrame([log_data])
-st.dataframe(df_log, use_container_width=True, hide_index=True)
+st.dataframe(pd.DataFrame([log_data]), use_container_width=True, hide_index=True)
 
 # ---------------- FOOTER ----------------
 st.markdown(f"""
 <div class="footer">
-    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; align-items: center;">
-        <i class="fas fa-leaf" style="font-size:2rem;"></i>
+    <div style="display: flex; justify-content: center; gap: 30px; align-items: center;">
+        <i class="fas fa-leaf"></i>
         <span style="font-size:1.8rem; font-weight:800;">FarmaBuddy</span>
-        <i class="fas fa-tractor" style="font-size:2rem;"></i>
+        <i class="fas fa-tractor"></i>
     </div>
     <p style="font-size:1.2rem; margin-top:1rem;">❤️ Made for farmers – simple, colorful, smart</p>
     <p style="font-size:0.9rem;">{datetime.now().strftime("%B %Y")}</p>
