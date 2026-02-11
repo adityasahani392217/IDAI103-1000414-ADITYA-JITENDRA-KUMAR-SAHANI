@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for enhanced UI
+# Custom CSS for enhanced UI with black text
 st.markdown("""
 <style>
     /* Main container styling */
@@ -180,6 +180,42 @@ st.markdown("""
         border-radius: 10px;
         border-left: 5px solid #f44336;
     }
+    
+    /* BLACK TEXT STYLES FOR FARM DATA AND INSIGHTS */
+    .black-text {
+        color: #000000 !important;
+    }
+    
+    .farm-data-text {
+        color: #000000 !important;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .insight-text {
+        color: #000000 !important;
+        line-height: 1.6;
+    }
+    
+    .ai-content {
+        color: #000000 !important;
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+    
+    /* Recommendation card content in black */
+    .recommendation-card p,
+    .recommendation-card div:not(.badge),
+    .recommendation-card span:not(.badge) {
+        color: #000000 !important;
+    }
+    
+    /* Keep headers green */
+    .recommendation-card h4 {
+        color: #2e7d32 !important;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -242,10 +278,10 @@ with st.sidebar:
         help="Select your primary farming objectives"
     )
     
-    # AI Creativity
+    # AI Creativity - Fixed label issue
     st.markdown("**🤖 AI Creativity Level**")
     temperature = st.slider(
-        "",
+        "Creativity Level",
         0.2,
         0.9,
         0.5,
@@ -284,203 +320,121 @@ with col1:
     st.markdown("### 💡 Get AI-Powered Farming Advice")
     
     # Action button with enhanced styling
-    # In the main action button section, fix the indentation:
+    if st.button("🚀 Generate Smart Recommendations", use_container_width=True, key="generate_btn"):
+        if not location:
+            st.warning("📍 Please enter your location to get personalized recommendations")
+        else:
+            try:
+                with st.spinner("🤖 AI is analyzing your farm data..."):
+                    # Build prompt
+                    prompt = f"""
+                    You are a professional agricultural advisor helping farmers.
 
-if st.button("🚀 Generate Smart Recommendations", use_container_width=True):
-    if not location:
-        st.warning("📍 Please enter your location to get personalized recommendations")
-    else:
-        try:
-            with st.spinner("🤖 AI is analyzing your farm data..."):
-                # Build prompt
-                prompt = f"""
-                You are a professional agricultural advisor helping farmers.
+                    Farmer Profile:
+                    Country/Region: {region}
+                    Location: {location}
+                    Crop Stage: {crop_stage}
+                    Priorities: {', '.join(priority) if priority else "General Best Practices"}
 
-                Farmer Profile:
-                Country/Region: {region}
-                Location: {location}
-                Crop Stage: {crop_stage}
-                Priorities: {', '.join(priority) if priority else "General Best Practices"}
+                    INSTRUCTIONS:
+                    - Provide EXACTLY 3 clear farming recommendations.
+                    - Format each recommendation using this structure:
 
-                INSTRUCTIONS:
-                - Provide EXACTLY 3 clear farming recommendations.
-                - Format each recommendation using this structure:
+                    Recommendation 1:
+                    • Action:
+                    • Why:
 
-                Recommendation 1:
-                • Action:
-                • Why:
+                    Recommendation 2:
+                    • Action:
+                    • Why:
 
-                Recommendation 2:
-                • Action:
-                • Why:
+                    Recommendation 3:
+                    • Action:
+                    • Why:
 
-                Recommendation 3:
-                • Action:
-                • Why:
-
-                - Keep language simple and practical.
-                - Make advice region-specific.
-                - Avoid unsafe chemical instructions.
-                - Ensure full explanation.
-                """
-                
-                # Get AI response
-                response = client.models.generate_content(
-                    model="gemini-3-flash-preview",
-                    contents=prompt,
-                    config={
-                        "temperature": temperature,
-                        "max_output_tokens": 1024
-                    }
-                )
-                
-                # Extract response
-                if hasattr(response, "text") and response.text:
-                    full_output = response.text
-                elif hasattr(response, "candidates"):
-                    try:
-                        full_output = response.candidates[0].content.parts[0].text
-                    except:
-                        full_output = "⚠️ Could not parse full response."
-                else:
-                    full_output = "⚠️ No content returned."
-                
-                # Display recommendations in cards
-                st.success("✅ AI Recommendations Generated Successfully!")
-                st.markdown("---")
-                st.markdown("### 📋 Your Personalized Farming Plan")
-                
-                # Split recommendations and display in cards
-                recommendations = full_output.split('\n\n')
-                for i, rec in enumerate(recommendations[:3], 1):
-                    if rec.strip():
-                        st.markdown(f"""
-                        <div class="recommendation-card">
-                            <h4 style="color: #2e7d32;">📌 Recommendation {i}</h4>
-                            <div class="recommendation-text ai-recommendations-content">
-                                {rec.replace('•', '➤').replace('Recommendation', '').strip()}
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
-                else:
-                    # Fallback display
+                    - Keep language simple and practical.
+                    - Make advice region-specific.
+                    - Avoid unsafe chemical instructions.
+                    - Ensure full explanation.
+                    """
+                    
+                    # Get AI response
+                    response = client.models.generate_content(
+                        model="gemini-3-flash-preview",
+                        contents=prompt,
+                        config={
+                            "temperature": temperature,
+                            "max_output_tokens": 1024
+                        }
+                    )
+                    
+                    # Extract response
+                    if hasattr(response, "text") and response.text:
+                        full_output = response.text
+                    elif hasattr(response, "candidates"):
+                        try:
+                            full_output = response.candidates[0].content.parts[0].text
+                        except:
+                            full_output = "⚠️ Could not parse full response."
+                    else:
+                        full_output = "⚠️ No content returned."
+                    
+                    # Store in session state to display later
+                    st.session_state.full_output = full_output
+                    st.session_state.show_recommendations = True
+                    
+            except Exception as e:
+                st.error("⚠️ Service Temporarily Unavailable")
+                with st.expander("Technical Details"):
+                    st.code(str(e))
+    
+    # Display recommendations from session state (only if they exist)
+    if 'show_recommendations' in st.session_state and st.session_state.show_recommendations:
+        if 'full_output' in st.session_state and st.session_state.full_output:
+            full_output = st.session_state.full_output
+            st.success("✅ AI Recommendations Generated Successfully!")
+            st.markdown("---")
+            st.markdown("### 📋 Your Personalized Farming Plan")
+            
+            # Split recommendations and display in cards
+            recommendations = full_output.split('\n\n')
+            for i, rec in enumerate(recommendations[:3], 1):
+                if rec.strip():
+                    # Clean up the text
+                    cleaned_rec = rec.replace('•', '➤').replace('Recommendation', '').strip()
                     st.markdown(f"""
                     <div class="recommendation-card">
-                        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
-                        <div class="recommendation-text ai-recommendations-content">
-                            {full_output}
+                        <h4>📌 Recommendation {i}</h4>
+                        <div class="ai-content">
+                            {cleaned_rec}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
-                
-        except Exception as e:
-            st.error("⚠️ Service Temporarily Unavailable")
-            with st.expander("Technical Details"):
-                st.code(str(e))
-# In the CSS section, add these specific styles:
-# In the CSS section, add these styles:
-st.markdown("""
-<style>
-    /* Make all farm data, insights, and recommendations text black */
-    .farm-data-text, .insight-text, .data-text, .recommendation-text {
-        color: #000000 !important;
-        font-weight: 500;
-    }
-    
-    /* Make all text inside recommendation cards black */
-    .recommendation-card p,
-    .recommendation-card li,
-    .recommendation-card div,
-    .recommendation-card span:not(.badge) {
-        color: #000000 !important;
-    }
-    
-    /* Specifically target AI recommendation content */
-    .ai-recommendations-content {
-        color: #000000 !important;
-    }
-    
-    /* Target the farm insights sections */
-    .farm-insights-section p,
-    .farm-insights-section strong {
-        color: #000000 !important;
-    }
-    
-    /* Make pro tip text black */
-    .pro-tip-section p,
-    .pro-tip-section small {
-        color: #000000 !important;
-    }
-    
-    /* Keep headers green but content black */
-    .recommendation-card h4 {
-        color: #2e7d32 !important;
-    }
-</style>
-""", unsafe_allow_html=True)
 
-# Update the farm insights section with new classes:
 with col2:
     st.markdown("### 📈 Farm Insights")
     
-    # Current farm status card - UPDATED
+    # Current farm status card
+    creativity_label = "Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"
+    
     st.markdown(f"""
-    <div class="recommendation-card farm-status-card farm-insights-section" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
-        <h4 style="color: #2e7d32;">🏡 Current Farm Status</h4>
+    <div class="recommendation-card">
+        <h4>🏡 Current Farm Status</h4>
         <p class="farm-data-text"><strong>Region:</strong> {region}</p>
         <p class="farm-data-text"><strong>Stage:</strong> {crop_stage}</p>
         <p class="farm-data-text"><strong>Priorities:</strong> {len(priority)}</p>
-        <p class="farm-data-text"><strong>AI Mode:</strong> {"Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"}</p>
+        <p class="farm-data-text"><strong>AI Mode:</strong> {creativity_label}</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Best practices tip - UPDATED
+    # Best practices tip
     st.markdown("""
-    <div class="recommendation-card pro-tip-card pro-tip-section" style="background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);">
-        <h4 style="color: #2e7d32;">💡 Pro Tip</h4>
+    <div class="recommendation-card">
+        <h4>💡 Pro Tip</h4>
         <p class="insight-text">For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
         <small class="insight-text">AI recommendations improve with accurate inputs.</small>
     </div>
     """, unsafe_allow_html=True)
-
-# Update the AI recommendations display section in the button action:
-# Replace this section:
-st.markdown("### 📋 Your Personalized Farming Plan")
-
-# Split recommendations and display in cards
-recommendations = full_output.split('\n\n')
-for i, rec in enumerate(recommendations[:3], 1):
-    if rec.strip():
-        st.markdown(f"""
-        <div class="recommendation-card">
-            <h4 style="color: #2e7d32;">📌 Recommendation {i}</h4>
-            <div class="recommendation-text ai-recommendations-content">
-                {rec.replace('•', '➤').replace('Recommendation', '').strip()}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-    # Fallback display
-        st.markdown(f"""
-        <div class="recommendation-card">
-            <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
-            <div class="recommendation-text ai-recommendations-content">
-                {full_output}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Also update the alternative display path:
-else:
-    st.markdown(f"""
-    <div class="recommendation-card">
-        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
-        <div class="recommendation-text ai-recommendations-content">
-            {full_output}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-# Update the usage log section:
 
 # ---------------- FEEDBACK SECTION ----------------
 st.markdown("---")
@@ -499,7 +453,7 @@ with col_fb2:
 
 with col_fb3:
     feedback5 = st.checkbox("✅ Safe & ethical", help="No unsafe recommendations")
-    if st.button("📤 Submit Feedback", use_container_width=True):
+    if st.button("📤 Submit Feedback", use_container_width=True, key="feedback_btn"):
         score = sum([feedback1, feedback2, feedback3, feedback4, feedback5])
         st.balloons()
         st.success(f"Thank you! Feedback recorded: {score}/5 stars ⭐")
@@ -507,7 +461,6 @@ with col_fb3:
 # ---------------- USAGE LOG ----------------
 st.markdown("---")
 st.markdown("### 📊 Session Log")
-st.markdown('<p class="usage-log-text">Current session activity and configuration:</p>', unsafe_allow_html=True)
 
 log_data = {
     "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -538,3 +491,9 @@ st.markdown("""
     </p>
 </div>
 """.format(current_date=datetime.now().strftime("%B %d, %Y")), unsafe_allow_html=True)
+
+# Initialize session state variables
+if 'full_output' not in st.session_state:
+    st.session_state.full_output = None
+if 'show_recommendations' not in st.session_state:
+    st.session_state.show_recommendations = False
