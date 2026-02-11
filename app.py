@@ -14,99 +14,115 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* ===== GLOBAL DARK GREEN THEME ===== */
+/* ---------- GLOBAL BACKGROUND ---------- */
 .stApp {
-    background: linear-gradient(135deg, #0f2e1a, #0a1f13);
-    color: #e8f5e9;
+    background: linear-gradient(135deg, #062e16 0%, #0d4020 40%, #08341a 100%);
+    color: #e8f5ec;
 }
 
-/* Force clean readable text */
-html, body, [class*="css"]  {
-    color: #e8f5e9 !important;
+/* Remove top padding */
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    max-width: 900px;
 }
 
-/* ===== HEADER ===== */
+/* ---------- HEADER ---------- */
 .main-header {
-    background: linear-gradient(90deg, #145c2c, #0f3d1f);
-    color: white;
-    padding: 2.5rem;
-    border-radius: 20px;
-    text-align: center;
-    margin-bottom: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-}
-
-/* ===== STEP CARD ===== */
-.step-card {
-    background: rgba(255,255,255,0.05);
+    background: rgba(20, 70, 35, 0.85);
     backdrop-filter: blur(10px);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    padding: 1.8rem 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 2rem;
+}
+
+.main-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.main-header p {
+    font-size: 0.95rem;
+    opacity: 0.8;
+}
+
+/* ---------- SECTION CARD ---------- */
+.step-card {
+    background: rgba(18, 60, 30, 0.8);
+    padding: 1.8rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* ===== AI RESPONSE CARD ===== */
-.advice-card {
-    background: rgba(255,255,255,0.08);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-    border-left: 6px solid #22c55e;
-    margin-top: 1.5rem;
-    font-size: 1.05rem;
+/* Accent left strip */
+.step-card::before {
+    content: "";
+    position: absolute;
+    height: 60px;
+    width: 4px;
+    background: #22c55e;
+    border-radius: 10px;
 }
 
-/* ===== LABELS ===== */
+/* ---------- INPUTS ---------- */
 label {
-    color: #bbf7d0 !important;
-    font-weight: 600;
+    font-weight: 600 !important;
+    color: #e8f5ec !important;
 }
 
-/* ===== INPUT FIELDS ===== */
-input, textarea, select {
-    background-color: #132f1e !important;
-    color: #ffffff !important;
+.stSelectbox > div,
+.stTextInput > div,
+.stTextArea > div,
+.stMultiSelect > div {
+    background-color: #0f3d1f !important;
     border-radius: 10px !important;
-    border: 1px solid #1f4d2f !important;
+    border: 1px solid #1d5b2c !important;
 }
 
-/* ===== BUTTONS ===== */
+input, textarea {
+    color: #ffffff !important;
+}
+
+/* ---------- BUTTON ---------- */
 .stButton>button {
     background: linear-gradient(90deg, #22c55e, #16a34a);
-    color: #0a1f13;
-    font-weight: 700;
-    border-radius: 14px;
-    padding: 0.8rem 1.8rem;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.7rem 1.4rem;
     border: none;
-    box-shadow: 0 5px 15px rgba(34,197,94,0.4);
+    transition: 0.2s ease-in-out;
 }
 
 .stButton>button:hover {
-    background: linear-gradient(90deg, #16a34a, #15803d);
-    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(34,197,94,0.4);
 }
 
-/* ===== RADIO & CHECKBOX TEXT ===== */
-div[role="radiogroup"] label,
-.stMultiSelect label {
-    color: #e8f5e9 !important;
+/* ---------- ADVICE CARD ---------- */
+.advice-card {
+    background: #0f3d1f;
+    padding: 2rem;
+    border-radius: 16px;
+    border-left: 5px solid #22c55e;
+    margin-top: 1.5rem;
+    line-height: 1.6;
 }
 
-/* ===== FOOTER ===== */
+/* ---------- FOOTER ---------- */
 .footer {
-    background: linear-gradient(90deg, #145c2c, #0f3d1f);
-    color: white;
-    padding: 1.5rem;
-    border-radius: 20px;
     text-align: center;
-    margin-top: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    margin-top: 3rem;
+    opacity: 0.6;
+    font-size: 0.85rem;
 }
 
 </style>
 """, unsafe_allow_html=True)
+
 
 # ---------------- API ----------------
 if "GOOGLE_API_KEY" not in st.secrets:
