@@ -1,305 +1,248 @@
 import streamlit as st
-import pandas as pd
-from datetime import datetime
 from google import genai
+from datetime import datetime
+import pandas as pd
 
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
-    page_title="FarmaBuddy 🌱",
-    page_icon="🌾",
+    page_title="Smart Farming Assistant",
+    page_icon="🌱",
     layout="wide"
 )
 
-# ---------------- CLEAN UI STYLE ----------------
+# ---------------- CLEAN MODERN UI STYLE ----------------
 st.markdown("""
 <style>
+
 .stApp {
-    background: linear-gradient(to bottom right, #f4fff6, #e8f5e9);
+    background: linear-gradient(to bottom right, #f6f8f6, #eaf5ec);
 }
 
 /* Header */
-.header-container {
-    background: linear-gradient(135deg, #1b5e20, #2e7d32);
-    padding: 2.5rem;
-    border-radius: 18px;
+.main-header {
+    background: #102216;
     color: white;
+    padding: 2rem;
+    border-radius: 20px;
     text-align: center;
     margin-bottom: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-}
-.title-text {
-    font-size: 3rem;
-    font-weight: 800;
-}
-.subtitle-text {
-    font-size: 1.1rem;
-    opacity: 0.9;
 }
 
-/* Buttons */
-.stButton > button {
-    background: linear-gradient(135deg, #43a047, #2e7d32);
-    color: white;
+.step-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+
+.advice-card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    border-left: 6px solid #2bee6c;
+    margin-top: 1.5rem;
+}
+
+.stButton>button {
+    background-color: #2bee6c;
+    color: #102216;
+    font-weight: 700;
     border-radius: 12px;
-    font-weight: 600;
     padding: 0.8rem 1.5rem;
     border: none;
 }
-.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+
+.stButton>button:hover {
+    background-color: #26d95f;
 }
 
-/* Cards */
-.recommendation-card {
+.chat-box {
     background: white;
-    padding: 1.8rem;
-    border-radius: 16px;
-    margin: 1.2rem 0;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    border-left: 6px solid #43a047;
-}
-.chat-container {
-    background: white;
-    border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    max-height: 450px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    max-height: 400px;
     overflow-y: auto;
 }
-.user-message {
-    background: #e3f2fd;
-    padding: 1rem;
-    border-radius: 16px;
-    margin: 0.8rem 0;
-}
-.ai-message {
-    background: #e8f5e9;
-    padding: 1rem;
-    border-radius: 16px;
-    margin: 0.8rem 0;
-}
+
 .footer {
-    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+    background: #102216;
     color: white;
-    padding: 2rem;
-    border-radius: 18px;
+    padding: 1.5rem;
+    border-radius: 20px;
     text-align: center;
-    margin-top: 2.5rem;
+    margin-top: 2rem;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- API SETUP ----------------
+# ---------------- API ----------------
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("🔐 GOOGLE_API_KEY missing in Streamlit Secrets")
     st.stop()
 
-api_key = st.secrets["GOOGLE_API_KEY"]
-client = genai.Client(api_key=api_key)
-
-# ---------------- HEADER ----------------
-st.markdown("""
-<div class="header-container">
-    <h1 class="title-text">🌱 FarmaBuddy</h1>
-    <h4 class="subtitle-text">AI-Powered Smart Farming Assistant</h4>
-    <p>Region-aware • Practical Advice • Built with Gemini</p>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------------- SIDEBAR ----------------
-with st.sidebar:
-    st.header("🌍 Farm Configuration")
-
-    region = st.selectbox("Country / Region",
-                          ["India", "Ghana", "Canada", "USA", "Australia", "Brazil"])
-
-    location = st.text_input("State / Province")
-
-    crop_stage = st.selectbox("Crop Stage",
-                              ["Planning", "Sowing", "Growing", "Harvesting"])
-
-    priorities = st.multiselect("Priorities",
-                                ["Low Water Use", "High Yield", "Organic Farming", "Low Cost"])
-
-    temperature = st.slider("AI Creativity", 0.2, 0.8, 0.4)
+client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # ---------------- SESSION STATE ----------------
+if "step" not in st.session_state:
+    st.session_state.step = 1
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# ---------------- TABS ----------------
-tab1, tab2 = st.tabs(["🌾 Recommendations", "💬 Chat Assistant"])
+# ---------------- HEADER ----------------
+st.markdown("""
+<div class="main-header">
+<h1>🌱 Smart Farming Assistant</h1>
+<p>AI-powered, region-aware advisory for farmers worldwide</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =====================================================
-# TAB 1 - RECOMMENDATIONS
+# STEP 1 – LANGUAGE
 # =====================================================
-with tab1:
+if st.session_state.step == 1:
+    st.markdown('<div class="step-card">', unsafe_allow_html=True)
+    st.subheader("Step 1: Select Language")
 
-    if st.button("🚀 Generate Smart Recommendations"):
+    language = st.radio("Choose Language", ["English", "Hindi"])
 
-        if not location:
-            st.warning("Please enter your location.")
-        else:
-            try:
-                with st.spinner("Analyzing farm data..."):
+    voice = st.toggle("Enable Voice Guidance")
 
-                    prompt = f"""
-You are a professional agricultural advisor.
-
-Farmer Context:
-Country: {region}
-Location: {location}
-Crop Stage: {crop_stage}
-Priorities: {', '.join(priorities) if priorities else 'General'}
-
-Provide EXACTLY 3 detailed recommendations.
-
-Format:
-Recommendation 1:
-• Action:
-• Why:
-
-Recommendation 2:
-• Action:
-• Why:
-
-Recommendation 3:
-• Action:
-• Why:
-
-Keep advice:
-- Practical
-- Region-specific
-- Safe
-- Easy to understand
-"""
-
-                    response = client.models.generate_content(
-                        model="gemini-1.5-flash",
-                        contents=prompt,
-                        config={
-                            "temperature": temperature,
-                            "max_output_tokens": 1500
-                        }
-                    )
-
-                    output_text = response.text
-
-                    st.success("✅ Recommendations Generated")
-
-                    # Show FULL OUTPUT (no truncation)
-                    st.markdown(f"""
-                    <div class="recommendation-card">
-                        {output_text}
-                    </div>
-                    """, unsafe_allow_html=True)
-
-            except Exception as e:
-                st.error("⚠️ AI service temporarily unavailable")
-                st.code(str(e))
-
-# =====================================================
-# TAB 2 - CHAT
-# =====================================================
-with tab2:
-
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-
-    for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            st.markdown(f'<div class="user-message"><b>You:</b> {msg["content"]}</div>',
-                        unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="ai-message"><b>FarmaBuddy:</b> {msg["content"]}</div>',
-                        unsafe_allow_html=True)
+    if st.button("Next →"):
+        st.session_state.language = language
+        st.session_state.voice = voice
+        st.session_state.step = 2
+        st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    user_input = st.text_input("Ask your farming question:")
+# =====================================================
+# STEP 2 – LOCATION
+# =====================================================
+elif st.session_state.step == 2:
+    st.markdown('<div class="step-card">', unsafe_allow_html=True)
+    st.subheader("Step 2: Location & Crop")
 
-    if st.button("Send") and user_input:
+    country = st.selectbox("Country",
+                           ["India", "Canada", "Ghana", "USA", "Brazil", "Australia"])
 
-        st.session_state.chat_history.append(
-            {"role": "user", "content": user_input})
+    state = st.text_input("State / Province")
 
-        try:
-            chat_prompt = f"""
-You are FarmaBuddy, an agricultural assistant.
+    crop = st.selectbox("Crop",
+                        ["Wheat", "Rice", "Maize", "Cotton", "Vegetables", "Other"])
 
-Farmer Context:
-Country: {region}
-Location: {location}
-Crop Stage: {crop_stage}
-
-User Question:
-{user_input}
-
-Provide:
-- Clear
-- Practical
-- Region-specific
-- Actionable advice
-"""
-
-            response = client.models.generate_content(
-                model="gemini-1.5-flash",
-                contents=chat_prompt,
-                config={
-                    "temperature": temperature,
-                    "max_output_tokens": 1500
-                }
-            )
-
-            ai_reply = response.text
-
-        except:
-            ai_reply = "⚠️ Unable to connect to AI service."
-
-        st.session_state.chat_history.append(
-            {"role": "assistant", "content": ai_reply})
-
+    if st.button("Next →"):
+        st.session_state.country = country
+        st.session_state.state = state
+        st.session_state.crop = crop
+        st.session_state.step = 3
         st.rerun()
 
-# ---------------- FEEDBACK ----------------
-st.markdown("---")
-st.subheader("✅ Quality Checklist")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-c1, c2, c3 = st.columns(3)
+# =====================================================
+# STEP 3 – CROP DETAILS
+# =====================================================
+elif st.session_state.step == 3:
+    st.markdown('<div class="step-card">', unsafe_allow_html=True)
+    st.subheader("Step 3: Crop Details")
 
-with c1:
-    f1 = st.checkbox("Region-specific")
-    f2 = st.checkbox("Logical reasoning")
+    stage = st.selectbox("Crop Stage",
+                         ["Sowing", "Growing", "Flowering", "Harvesting"])
 
-with c2:
-    f3 = st.checkbox("Simple language")
-    f4 = st.checkbox("Actionable steps")
+    severity = st.radio("Problem Severity",
+                        ["Low", "Medium", "High"])
 
-with c3:
-    f5 = st.checkbox("Safe advice")
+    preferences = st.multiselect("Farming Preferences",
+                                  ["Organic", "Low Cost", "Quick Results", "Minimal Labor"])
 
-if st.button("Submit Feedback"):
-    score = sum([f1, f2, f3, f4, f5])
-    st.success(f"Feedback Score: {score}/5 ⭐")
+    if st.button("Next →"):
+        st.session_state.stage = stage
+        st.session_state.severity = severity
+        st.session_state.preferences = preferences
+        st.session_state.step = 4
+        st.rerun()
 
-# ---------------- SESSION LOG ----------------
-st.markdown("---")
-st.subheader("📊 Session Log")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-log_df = pd.DataFrame([{
-    "Time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "Region": region,
-    "Location": location,
-    "Crop Stage": crop_stage,
-    "Chat Messages": len(st.session_state.chat_history)
-}])
+# =====================================================
+# STEP 4 – ASK QUESTION
+# =====================================================
+elif st.session_state.step == 4:
+    st.markdown('<div class="step-card">', unsafe_allow_html=True)
+    st.subheader("Step 4: Ask Your Question")
 
-st.dataframe(log_df, use_container_width=True)
+    question = st.text_area("Describe your farming problem")
 
-# ---------------- FOOTER ----------------
+    if st.button("Get AI Advice"):
+        st.session_state.question = question
+        st.session_state.step = 5
+        st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# =====================================================
+# STEP 5 – AI RESPONSE
+# =====================================================
+elif st.session_state.step == 5:
+
+    st.subheader("🌾 AI-Generated Farming Advice")
+
+    try:
+        prompt = f"""
+You are an expert agricultural advisor.
+
+Farmer Context:
+Country: {st.session_state.country}
+State: {st.session_state.state}
+Crop: {st.session_state.crop}
+Crop Stage: {st.session_state.stage}
+Severity: {st.session_state.severity}
+Preferences: {', '.join(st.session_state.preferences)}
+
+Question:
+{st.session_state.question}
+
+Instructions:
+- Provide clear bullet-point advice.
+- Each recommendation must include WHY.
+- Keep language simple.
+- Make it region-specific.
+"""
+
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config={
+                "temperature": 0.4,
+                "max_output_tokens": 2000
+            }
+        )
+
+        output_text = response.text
+
+        st.markdown(f"""
+        <div class="advice-card">
+        {output_text}
+        </div>
+        """, unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error("AI service temporarily unavailable.")
+        st.code(str(e))
+
+    if st.button("🔄 Start Over"):
+        st.session_state.step = 1
+        st.rerun()
+
+# =====================================================
+# FOOTER
+# =====================================================
 st.markdown(f"""
 <div class="footer">
-FarmaBuddy AI • FA-2 Project • {datetime.now().strftime("%Y")}  
-Built with Gemini 1.5 Flash
+Smart Farming Assistant • Gemini Powered • {datetime.now().year}
 </div>
 """, unsafe_allow_html=True)
