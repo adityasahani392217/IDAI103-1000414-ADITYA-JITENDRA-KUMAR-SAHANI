@@ -373,101 +373,108 @@ with col1:
                     st.code(str(e))
 
 # In the CSS section, add these specific styles:
-
+# In the CSS section, add these styles:
 st.markdown("""
 <style>
-    /* Add these new styles for black text in data sections */
-    
-    /* Farm data and insights text in black */
-    .farm-data-text, .insight-text, .data-text {
+    /* Make all farm data, insights, and recommendations text black */
+    .farm-data-text, .insight-text, .data-text, .recommendation-text {
         color: #000000 !important;
         font-weight: 500;
     }
     
-    /* Specific targeting for farm insights card */
-    .recommendation-card p, .recommendation-card strong {
+    /* Make all text inside recommendation cards black */
+    .recommendation-card p,
+    .recommendation-card li,
+    .recommendation-card div,
+    .recommendation-card span:not(.badge) {
         color: #000000 !important;
     }
     
-    /* Make sure all text in data sections is black */
-    [data-testid="stExpander"] p,
-    [data-testid="stExpander"] li,
-    .stDataFrame,
-    .stDataFrame td,
-    .stDataFrame th {
+    /* Specifically target AI recommendation content */
+    .ai-recommendations-content {
         color: #000000 !important;
     }
     
-    /* Current farm status card text in black */
-    .farm-status-card p,
-    .farm-status-card strong {
+    /* Target the farm insights sections */
+    .farm-insights-section p,
+    .farm-insights-section strong {
         color: #000000 !important;
     }
     
-    /* AI recommendations text in black */
-    .ai-recommendation {
+    /* Make pro tip text black */
+    .pro-tip-section p,
+    .pro-tip-section small {
         color: #000000 !important;
     }
     
-    /* Pro tip card text in black */
-    .pro-tip-card p,
-    .pro-tip-card small {
-        color: #000000 !important;
-    }
-    
-    /* Usage log text in black */
-    .usage-log-text,
-    .stDataFrame {
-        color: #000000 !important;
-    }
-    
-    /* Session log text in black */
-    .session-log p {
-        color: #000000 !important;
+    /* Keep headers green but content black */
+    .recommendation-card h4 {
+        color: #2e7d32 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Then update the farm insights card in col2 to use the new class:
+# Update the farm insights section with new classes:
 with col2:
     st.markdown("### 📈 Farm Insights")
     
     # Current farm status card - UPDATED
-    st.markdown("""
-    <div class="recommendation-card farm-status-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
+    st.markdown(f"""
+    <div class="recommendation-card farm-status-card farm-insights-section" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
         <h4 style="color: #2e7d32;">🏡 Current Farm Status</h4>
         <p class="farm-data-text"><strong>Region:</strong> {region}</p>
         <p class="farm-data-text"><strong>Stage:</strong> {crop_stage}</p>
-        <p class="farm-data-text"><strong>Priorities:</strong> {priority_count}</p>
-        <p class="farm-data-text"><strong>AI Mode:</strong> {creativity_label}</p>
+        <p class="farm-data-text"><strong>Priorities:</strong> {len(priority)}</p>
+        <p class="farm-data-text"><strong>AI Mode:</strong> {"Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"}</p>
     </div>
-    """.format(
-        region=region,
-        crop_stage=crop_stage,
-        priority_count=len(priority),
-        creativity_label="Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"
-    ), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     # Best practices tip - UPDATED
     st.markdown("""
-    <div class="recommendation-card pro-tip-card" style="background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);">
+    <div class="recommendation-card pro-tip-card pro-tip-section" style="background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);">
         <h4 style="color: #2e7d32;">💡 Pro Tip</h4>
         <p class="insight-text">For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
         <small class="insight-text">AI recommendations improve with accurate inputs.</small>
     </div>
     """, unsafe_allow_html=True)
 
-# Update the AI recommendations display to use black text:
-# In the main button action section, update the recommendation display:
-st.markdown(f"""
-<div class="recommendation-card">
-    <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
-    <div class="ai-recommendation">
-        {full_output}
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Update the AI recommendations display section in the button action:
+# Replace this section:
+st.markdown("### 📋 Your Personalized Farming Plan")
 
+# Split recommendations and display in cards
+recommendations = full_output.split('\n\n')
+for i, rec in enumerate(recommendations[:3], 1):
+    if rec.strip():
+        st.markdown(f"""
+        <div class="recommendation-card">
+            <h4 style="color: #2e7d32;">📌 Recommendation {i}</h4>
+            <div class="recommendation-text ai-recommendations-content">
+                {rec.replace('•', '➤').replace('Recommendation', '').strip()}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+else:
+    # Fallback display
+    st.markdown(f"""
+    <div class="recommendation-card">
+        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
+        <div class="recommendation-text ai-recommendations-content">
+            {full_output}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Also update the alternative display path:
+else:
+    st.markdown(f"""
+    <div class="recommendation-card">
+        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
+        <div class="recommendation-text ai-recommendations-content">
+            {full_output}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 # Update the usage log section:
 
 # ---------------- FEEDBACK SECTION ----------------
