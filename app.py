@@ -374,7 +374,7 @@ with col1:
 
 # In the CSS section, add these specific styles:
 
-.st.markdown("""
+st.markdown("""
 <style>
     /* Add these new styles for black text in data sections */
     
