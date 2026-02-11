@@ -454,16 +454,16 @@ for i, rec in enumerate(recommendations[:3], 1):
             </div>
         </div>
         """, unsafe_allow_html=True)
-else:
+    else:
     # Fallback display
-    st.markdown(f"""
-    <div class="recommendation-card">
-        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
-        <div class="recommendation-text ai-recommendations-content">
-            {full_output}
+        st.markdown(f"""
+        <div class="recommendation-card">
+            <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
+            <div class="recommendation-text ai-recommendations-content">
+                {full_output}
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 # Also update the alternative display path:
 else:
