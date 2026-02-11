@@ -713,7 +713,7 @@ with tab2:
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Chat input with vibrant design
-    st.markdown("### 💭 Ask a Question")
+  
     col_chat1, col_chat2 = st.columns([5, 1])
     
     with col_chat1:
