@@ -372,17 +372,74 @@ with col1:
                 with st.expander("Technical Details"):
                     st.code(str(e))
 
+# In the CSS section, add these specific styles:
+
+.st.markdown("""
+<style>
+    /* Add these new styles for black text in data sections */
+    
+    /* Farm data and insights text in black */
+    .farm-data-text, .insight-text, .data-text {
+        color: #000000 !important;
+        font-weight: 500;
+    }
+    
+    /* Specific targeting for farm insights card */
+    .recommendation-card p, .recommendation-card strong {
+        color: #000000 !important;
+    }
+    
+    /* Make sure all text in data sections is black */
+    [data-testid="stExpander"] p,
+    [data-testid="stExpander"] li,
+    .stDataFrame,
+    .stDataFrame td,
+    .stDataFrame th {
+        color: #000000 !important;
+    }
+    
+    /* Current farm status card text in black */
+    .farm-status-card p,
+    .farm-status-card strong {
+        color: #000000 !important;
+    }
+    
+    /* AI recommendations text in black */
+    .ai-recommendation {
+        color: #000000 !important;
+    }
+    
+    /* Pro tip card text in black */
+    .pro-tip-card p,
+    .pro-tip-card small {
+        color: #000000 !important;
+    }
+    
+    /* Usage log text in black */
+    .usage-log-text,
+    .stDataFrame {
+        color: #000000 !important;
+    }
+    
+    /* Session log text in black */
+    .session-log p {
+        color: #000000 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Then update the farm insights card in col2 to use the new class:
 with col2:
     st.markdown("### 📈 Farm Insights")
     
-    # Current farm status card
+    # Current farm status card - UPDATED
     st.markdown("""
-    <div class="recommendation-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
-        <h4>🏡 Current Farm Status</h4>
-        <p><strong>Region:</strong> {region}</p>
-        <p><strong>Stage:</strong> {crop_stage}</p>
-        <p><strong>Priorities:</strong> {priority_count}</p>
-        <p><strong>AI Mode:</strong> {creativity_label}</p>
+    <div class="recommendation-card farm-status-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
+        <h4 style="color: #2e7d32;">🏡 Current Farm Status</h4>
+        <p class="farm-data-text"><strong>Region:</strong> {region}</p>
+        <p class="farm-data-text"><strong>Stage:</strong> {crop_stage}</p>
+        <p class="farm-data-text"><strong>Priorities:</strong> {priority_count}</p>
+        <p class="farm-data-text"><strong>AI Mode:</strong> {creativity_label}</p>
     </div>
     """.format(
         region=region,
@@ -391,14 +448,27 @@ with col2:
         creativity_label="Creative" if temperature > 0.6 else "Balanced" if temperature > 0.4 else "Conservative"
     ), unsafe_allow_html=True)
     
-    # Best practices tip
+    # Best practices tip - UPDATED
     st.markdown("""
-    <div class="recommendation-card" style="background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);">
-        <h4>💡 Pro Tip</h4>
-        <p>For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
-        <small style="color: #666;">AI recommendations improve with accurate inputs.</small>
+    <div class="recommendation-card pro-tip-card" style="background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);">
+        <h4 style="color: #2e7d32;">💡 Pro Tip</h4>
+        <p class="insight-text">For best results, ensure your location is specific (state/province level) and priorities reflect your actual farming goals.</p>
+        <small class="insight-text">AI recommendations improve with accurate inputs.</small>
     </div>
     """, unsafe_allow_html=True)
+
+# Update the AI recommendations display to use black text:
+# In the main button action section, update the recommendation display:
+st.markdown(f"""
+<div class="recommendation-card">
+    <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
+    <div class="ai-recommendation">
+        {full_output}
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Update the usage log section:
 
 # ---------------- FEEDBACK SECTION ----------------
 st.markdown("---")
@@ -425,6 +495,7 @@ with col_fb3:
 # ---------------- USAGE LOG ----------------
 st.markdown("---")
 st.markdown("### 📊 Session Log")
+st.markdown('<p class="usage-log-text">Current session activity and configuration:</p>', unsafe_allow_html=True)
 
 log_data = {
     "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
