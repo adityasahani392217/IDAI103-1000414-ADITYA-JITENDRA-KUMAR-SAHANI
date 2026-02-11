@@ -11,58 +11,33 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# VIBRANT FARMING THEME CSS
+# VIBRANT SOLID COLOR THEME CSS
 st.markdown("""
 <style>
-    /* 🌈 VIBRANT BACKGROUND GRADIENTS */
+    /* 🎨 SOLID COLOR BACKGROUNDS */
     .stApp {
-        background: linear-gradient(135deg, #e6ffe6 0%, #f0fff0 25%, #f5fff5 50%, #e8f8e8 75%, #d4f8d4 100%) !important;
-        background-attachment: fixed !important;
+        background-color: #f8fff8 !important;
     }
     
-    /* 🎨 VIBRANT HEADER WITH FARMING PATTERN */
+    /* 🌈 VIBRANT HEADER WITH SOLID COLORS */
     .header-container {
-        background: linear-gradient(90deg, 
-            #ff6b6b 0%, 
-            #ffa726 20%, 
-            #ffd93d 40%, 
-            #6bcf7f 60%, 
-            #4d96ff 80%, 
-            #9d65c9 100%);
+        background-color: #2E8B57;  /* Sea Green */
         padding: 2.5rem;
         border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 25px rgba(46, 139, 87, 0.3);
         margin-bottom: 2.5rem;
         color: white;
         text-align: center;
         position: relative;
         overflow: hidden;
-        border: 5px solid white;
-    }
-    
-    .header-container::before {
-        content: "🌾🌻🌽🌿☀️💧";
-        position: absolute;
-        top: 10px;
-        left: 0;
-        right: 0;
-        font-size: 2rem;
-        opacity: 0.3;
-        animation: float 10s infinite linear;
-    }
-    
-    @keyframes float {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
+        border: 5px solid #FFD700;
     }
     
     .title-text {
         font-size: 4rem !important;
         font-weight: 900 !important;
         margin-bottom: 0.5rem !important;
-        background: linear-gradient(45deg, #ffffff, #ffffe0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #FFFFFF !important;
         text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
         position: relative;
         z-index: 1;
@@ -71,92 +46,78 @@ st.markdown("""
     .subtitle-text {
         font-size: 1.5rem !important;
         font-weight: 600 !important;
-        background: linear-gradient(45deg, #ffffff, #e0ffe0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #FFD700 !important;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         position: relative;
         z-index: 1;
     }
     
-    /* 🌿 SIDEBAR - FARM FIELD DESIGN */
+    /* 🏞️ SIDEBAR - NATURE COLORS */
     .sidebar .sidebar-content {
-        background: linear-gradient(180deg, 
-            #1a5276 0%, 
-            #2e7d32 30%, 
-            #27ae60 70%, 
-            #2ecc71 100%);
-        background-image: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 10px),
-                         radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 10px);
+        background-color: #228B22;  /* Forest Green */
         color: white;
-        border-right: 5px solid #ffd700;
+        border-right: 5px solid #FFA500;
     }
     
     .sidebar-header {
-        background: rgba(255, 255, 255, 0.15);
+        background-color: rgba(255, 165, 0, 0.9);  /* Orange */
         padding: 1.2rem;
         border-radius: 15px;
         margin-bottom: 1.5rem;
-        border-left: 5px solid #ffd700;
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(255, 255, 255, 0.2);
+        border: 3px solid #FFD700;
+        color: #000000 !important;
     }
     
-    /* 🎪 VIBRANT INPUT STYLING */
+    /* 🎨 VIBRANT INPUT STYLING */
     div[data-baseweb="select"] > div {
         border-radius: 12px !important;
-        border: 3px solid #ff6b6b !important;
-        background: linear-gradient(135deg, #ffffff, #ffe6e6) !important;
+        border: 3px solid #FF6B6B !important;
+        background-color: #FFFFFF !important;
         transition: all 0.3s ease !important;
     }
     
     div[data-baseweb="select"] > div:hover {
-        border-color: #ff3838 !important;
+        border-color: #FF4444 !important;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4) !important;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3) !important;
     }
     
     div[data-baseweb="input"] > div {
         border-radius: 12px !important;
-        border: 3px solid #4d96ff !important;
-        background: linear-gradient(135deg, #ffffff, #e6f0ff) !important;
+        border: 3px solid #4A90E2 !important;
+        background-color: #FFFFFF !important;
         transition: all 0.3s ease !important;
     }
     
     div[data-baseweb="input"] > div:hover {
-        border-color: #2d7dff !important;
+        border-color: #357AE8 !important;
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(77, 150, 255, 0.4) !important;
+        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3) !important;
     }
     
-    /* 🌈 COLORFUL MULTISELECT */
+    /* 🎯 VIBRANT MULTISELECT */
     div[data-baseweb="multiselect"] > div {
         border-radius: 12px !important;
-        border: 3px solid #6bcf7f !important;
-        background: linear-gradient(135deg, #ffffff, #e6ffe6) !important;
+        border: 3px solid #32CD32 !important;
+        background-color: #FFFFFF !important;
     }
     
-    /* 🎯 VIBRANT SLIDER */
+    /* 🎨 COLORFUL SLIDER */
     .stSlider > div > div {
-        background: linear-gradient(90deg, #ff6b6b, #ffa726, #ffd93d, #6bcf7f, #4d96ff) !important;
+        background: linear-gradient(90deg, #FF6B6B, #FFA500, #32CD32, #4A90E2) !important;
         border-radius: 10px;
         height: 10px !important;
     }
     
     .stSlider > div > div > div {
-        background-color: #ffffff !important;
-        border: 3px solid #9d65c9 !important;
-        box-shadow: 0 0 10px rgba(157, 101, 201, 0.8) !important;
+        background-color: #FFFFFF !important;
+        border: 3px solid #9B59B6 !important;
+        box-shadow: 0 0 10px rgba(155, 89, 182, 0.5) !important;
     }
     
-    /* 🚀 GLOWING BUTTONS */
+    /* 🚀 VIBRANT BUTTONS */
     .stButton > button {
-        background: linear-gradient(90deg, 
-            #ff6b6b 0%, 
-            #ffa726 25%, 
-            #6bcf7f 50%, 
-            #4d96ff 75%, 
-            #9d65c9 100%) !important;
+        background-color: #FF6B6B !important;
         color: white !important;
         border: none !important;
         padding: 1rem 2rem !important;
@@ -164,45 +125,21 @@ st.markdown("""
         font-weight: 700 !important;
         font-size: 1.2rem !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4) !important;
         position: relative !important;
         overflow: hidden !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
     }
     
     .stButton > button:hover {
-        transform: translateY(-3px) scale(1.02) !important;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
-        animation: pulse 1.5s infinite !important;
+        background-color: #FF4444 !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6) !important;
     }
     
-    .stButton > button::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-    
-    .stButton > button:hover::before {
-        opacity: 1;
-    }
-    
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
-        70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-    }
-    
-    /* 🎨 VIBRANT TABS */
+    /* 🎪 COLORFUL TABS */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background: linear-gradient(90deg, #ff6b6b, #ffa726, #6bcf7f, #4d96ff);
+        background-color: #2E8B57;
         padding: 10px;
         border-radius: 15px;
     }
@@ -210,9 +147,9 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] {
         height: 60px;
         white-space: pre-wrap;
-        background: rgba(255, 255, 255, 0.9) !important;
+        background-color: #FFFFFF !important;
         border-radius: 10px !important;
-        color: #2e7d32 !important;
+        color: #2E8B57 !important;
         font-weight: 700 !important;
         font-size: 1.1rem !important;
         border: 2px solid transparent !important;
@@ -220,48 +157,34 @@ st.markdown("""
     }
     
     .stTabs [aria-selected="true"] {
-        background: white !important;
-        color: #ff6b6b !important;
-        border: 2px solid #ff6b6b !important;
+        background-color: #FFD700 !important;
+        color: #2E8B57 !important;
+        border: 2px solid #FF6B6B !important;
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3) !important;
     }
     
-    /* 💎 3D CARDS */
+    /* 💎 VIBRANT CARDS */
     .recommendation-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+        background-color: #FFFFFF;
         border-radius: 20px;
         padding: 2rem;
         margin: 1.5rem 0;
-        border-left: 8px solid;
-        box-shadow: 
-            0 10px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-left: 8px solid #FF6B6B;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
     
-    .recommendation-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #ff6b6b, #ffa726, #6bcf7f, #4d96ff, #9d65c9);
-    }
-    
     .recommendation-card:hover {
-        transform: translateY(-10px) rotateX(5deg);
-        box-shadow: 
-            0 20px 40px rgba(0, 0, 0, 0.2),
-            0 0 0 1px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        border-left-color: #FF4444;
     }
     
     .recommendation-card h4 {
-        color: #2e7d32 !important;
+        color: #2E8B57 !important;
         font-size: 1.5rem !important;
         font-weight: 800 !important;
         margin-bottom: 1rem !important;
@@ -270,14 +193,13 @@ st.markdown("""
         gap: 10px;
     }
     
-    /* 🎪 CHAT MESSAGES - BLACK TEXT ENSURED */
+    /* 💬 CHAT MESSAGES - BLACK TEXT ENSURED */
     .user-message {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        background-color: #E3F2FD;
         padding: 1.2rem;
         border-radius: 20px 20px 5px 20px;
         margin: 1rem 0;
-        border: 2px solid #2196f3;
-        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+        border: 2px solid #2196F3;
         position: relative;
         max-width: 80%;
         margin-left: auto;
@@ -293,12 +215,11 @@ st.markdown("""
     }
     
     .ai-message {
-        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        background-color: #E8F5E9;
         padding: 1.2rem;
         border-radius: 20px 20px 20px 5px;
         margin: 1rem 0;
-        border: 2px solid #4caf50;
-        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        border: 2px solid #4CAF50;
         position: relative;
         max-width: 80%;
     }
@@ -339,13 +260,12 @@ st.markdown("""
         overflow-y: auto;
         padding: 1.5rem;
         border-radius: 20px;
-        background: linear-gradient(135deg, #f9fdf9 0%, #e8f5e9 100%);
-        border: 3px solid #4caf50;
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: #F9FDF9;
+        border: 3px solid #4CAF50;
         margin: 1rem 0;
     }
     
-    /* ✨ GLOWING BADGES */
+    /* ✨ VIBRANT BADGES */
     .badge {
         display: inline-block;
         padding: 0.5rem 1rem;
@@ -353,39 +273,37 @@ st.markdown("""
         font-size: 0.9rem;
         font-weight: 700;
         margin: 0.3rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
         border: 2px solid white;
     }
     
     .badge-primary {
-        background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+        background-color: #FF6B6B;
         color: white;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     }
     
     .badge-secondary {
-        background: linear-gradient(135deg, #4d96ff, #6bcf7f);
+        background-color: #4A90E2;
         color: white;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     }
     
     .badge:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
     
-    /* 📊 DATA TABLE STYLING */
+    /* 📊 COLORFUL DATA TABLE */
     .dataframe {
         border-radius: 15px !important;
         overflow: hidden !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-        border: 3px solid #4caf50 !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+        border: 3px solid #4CAF50 !important;
         background: white !important;
     }
     
     .dataframe th {
-        background: linear-gradient(135deg, #4caf50, #2e7d32) !important;
+        background-color: #4CAF50 !important;
         color: white !important;
         font-weight: 700 !important;
         text-align: center !important;
@@ -402,45 +320,45 @@ st.markdown("""
         padding: 0.8rem !important;
         border-radius: 10px !important;
         transition: all 0.3s ease !important;
-        background: linear-gradient(135deg, #f5f5f5, #ffffff) !important;
-        border: 2px solid #e0e0e0 !important;
+        background-color: #F5F5F5 !important;
+        border: 2px solid #E0E0E0 !important;
         margin: 0.5rem 0 !important;
     }
     
     .stCheckbox > label:hover {
-        background: linear-gradient(135deg, #e3f2fd, #f3e5f5) !important;
-        border-color: #9d65c9 !important;
+        background-color: #E3F2FD !important;
+        border-color: #2196F3 !important;
         transform: translateX(5px);
     }
     
     /* 🌟 SUCCESS/ERROR MESSAGES */
     .stSuccess {
-        background: linear-gradient(135deg, #e8f5e9, #c8e6c9) !important;
+        background-color: #E8F5E9 !important;
         border-radius: 15px !important;
-        border-left: 8px solid #4caf50 !important;
+        border-left: 8px solid #4CAF50 !important;
         padding: 1rem !important;
-        border: 2px solid #4caf50 !important;
-        color: #1b5e20 !important;
+        border: 2px solid #4CAF50 !important;
+        color: #1B5E20 !important;
         font-weight: 600 !important;
     }
     
     .stError {
-        background: linear-gradient(135deg, #ffebee, #ffcdd2) !important;
+        background-color: #FFEBEE !important;
         border-radius: 15px !important;
-        border-left: 8px solid #f44336 !important;
+        border-left: 8px solid #F44336 !important;
         padding: 1rem !important;
-        border: 2px solid #f44336 !important;
-        color: #b71c1c !important;
+        border: 2px solid #F44336 !important;
+        color: #B71C1C !important;
         font-weight: 600 !important;
     }
     
     .stWarning {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2) !important;
+        background-color: #FFF3E0 !important;
         border-radius: 15px !important;
-        border-left: 8px solid #ff9800 !important;
+        border-left: 8px solid #FF9800 !important;
         padding: 1rem !important;
-        border: 2px solid #ff9800 !important;
-        color: #e65100 !important;
+        border: 2px solid #FF9800 !important;
+        color: #E65100 !important;
         font-weight: 600 !important;
     }
     
@@ -449,29 +367,12 @@ st.markdown("""
         text-align: center;
         margin-top: 3rem;
         padding: 2rem;
-        background: linear-gradient(90deg, 
-            #ff6b6b 0%, 
-            #ffa726 25%, 
-            #6bcf7f 50%, 
-            #4d96ff 75%, 
-            #9d65c9 100%);
+        background-color: #2E8B57;
         border-radius: 20px;
-        border-top: 5px solid white;
+        border-top: 5px solid #FFD700;
         color: white;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         position: relative;
         overflow: hidden;
-    }
-    
-    .footer::before {
-        content: "🌱🌾🌻🌽🍅🥕";
-        position: absolute;
-        top: 10px;
-        left: 0;
-        right: 0;
-        font-size: 1.5rem;
-        opacity: 0.3;
-        animation: float 15s infinite linear reverse;
     }
     
     /* 📱 RESPONSIVE DESIGN */
@@ -489,26 +390,7 @@ st.markdown("""
         }
     }
     
-    /* 🔥 SPECIAL EFFECTS */
-    .sparkle {
-        animation: sparkle 2s infinite;
-    }
-    
-    @keyframes sparkle {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    
-    /* 🎨 COLORFUL TEXT CLASSES */
-    .rainbow-text {
-        background: linear-gradient(90deg, 
-            #ff6b6b, #ffa726, #ffd93d, #6bcf7f, #4d96ff, #9d65c9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-    }
-    
-    /* 💫 ALL TEXT IN BLACK (except headers) */
+    /* 💫 ALL TEXT IN BLACK (except headers and special elements) */
     p, div:not(.header-container):not(.sidebar-header):not(.title-text):not(.subtitle-text):not(.badge):not(.stButton > button):not(.stTabs [data-baseweb="tab"]):not(.footer) {
         color: #000000 !important;
     }
@@ -524,6 +406,40 @@ st.markdown("""
         color: #000000 !important;
         line-height: 1.8 !important;
         font-weight: 500 !important;
+    }
+    
+    /* 🎨 SPECIFIC TEXT COLOR OVERRIDES */
+    .sidebar * {
+        color: white !important;
+    }
+    
+    .sidebar-header * {
+        color: #000000 !important;
+    }
+    
+    .header-container *:not(.title-text):not(.subtitle-text) {
+        color: #FFD700 !important;
+    }
+    
+    /* 🎯 INPUT LABELS */
+    label {
+        color: #2E8B57 !important;
+        font-weight: 600 !important;
+    }
+    
+    /* 🎨 TAB CONTENT TEXT */
+    [data-testid="stTabContent"] * {
+        color: #000000 !important;
+    }
+    
+    /* 🎯 CHAT INPUT TEXT */
+    input[type="text"] {
+        color: #000000 !important;
+    }
+    
+    /* 🎨 SIDEBAR HELP TEXT */
+    [data-testid="stHelp"] {
+        color: #FFD700 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -541,8 +457,8 @@ st.markdown("""
 <div class="header-container">
     <h1 class="title-text">🌱 FarmaBuddy</h1>
     <h4 class="subtitle-text">AI-Powered Smart Farming Assistant</h4>
-    <p style="opacity: 0.9; margin-bottom: 0; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
-        🚀 Transform Your Farming with AI • 🌈 Colorful Experience • 💡 Smart Insights
+    <p style="opacity: 0.9; margin-bottom: 0; font-size: 1.1rem; font-weight: 500;">
+        🚀 Transform Your Farming with AI • 🎨 Colorful Experience • 💡 Smart Insights
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -551,7 +467,7 @@ st.markdown("""
 with st.sidebar:
     st.markdown('<div class="sidebar-header">', unsafe_allow_html=True)
     st.markdown("### 🌍 Farm Configuration")
-    st.markdown('<p style="color: #ffd700; font-size: 0.9rem;">Customize your farming experience</p>', unsafe_allow_html=True)
+    st.markdown('<p style="font-size: 0.9rem;">Customize your farming experience</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Farm Region with icon
@@ -611,7 +527,7 @@ with st.sidebar:
     </div>
     <div class="creativity-level" style="width: {creativity_percent}%"></div>
     <div style="text-align: center; margin-top: 10px;">
-        <span style="color: #ffd700; font-weight: 700; font-size: 1.1rem;">
+        <span style="color: #FFD700; font-weight: 700; font-size: 1.1rem;">
             🎭 {creativity_percent}% Creativity Mode
         </span>
     </div>
@@ -751,12 +667,12 @@ with tab1:
         st.markdown(f"""
         <div class="recommendation-card">
             <h4>🏡 Current Farm Status</h4>
-            <p class="farm-data-text"><strong>🌎 Region:</strong> {region}</p>
-            <p class="farm-data-text"><strong>🌱 Stage:</strong> {crop_stage}</p>
-            <p class="farm-data-text"><strong>🎯 Priorities:</strong> {len(priority)} selected</p>
-            <p class="farm-data-text"><strong>🤖 AI Mode:</strong> {creativity_label}</p>
-            <div style="margin-top: 1rem; padding: 0.5rem; background: linear-gradient(135deg, #e3f2fd, #f3e5f5); border-radius: 10px;">
-                <small>📍 <strong>Location:</strong> {location if location else "Not specified"}</small>
+            <p class="insight-text"><strong style="color: #2E8B57;">🌎 Region:</strong> {region}</p>
+            <p class="insight-text"><strong style="color: #2E8B57;">🌱 Stage:</strong> {crop_stage}</p>
+            <p class="insight-text"><strong style="color: #2E8B57;">🎯 Priorities:</strong> {len(priority)} selected</p>
+            <p class="insight-text"><strong style="color: #2E8B57;">🤖 AI Mode:</strong> {creativity_label}</p>
+            <div style="margin-top: 1rem; padding: 0.5rem; background-color: #E3F2FD; border-radius: 10px;">
+                <small><strong style="color: #2196F3;">📍 Location:</strong> {location if location else "Not specified"}</small>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -771,20 +687,6 @@ with tab1:
             </small>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Quick stats
-        st.markdown("""
-        <div class="recommendation-card">
-            <h4>📊 Quick Stats</h4>
-            <p class="insight-text">🎯 <strong>Active Priorities:</strong> {}</p>
-            <p class="insight-text">💬 <strong>Chat Messages:</strong> {}</p>
-            <p class="insight-text">🤖 <strong>AI Creativity:</strong> {}%</p>
-        </div>
-        """.format(
-            len(priority),
-            len(st.session_state.chat_history),
-            creativity_percent
-        ), unsafe_allow_html=True)
 
 with tab2:
     st.markdown("### 💬 Ask Farming Questions")
@@ -938,17 +840,17 @@ st.dataframe(df_log, use_container_width=True, hide_index=True)
 st.markdown("""
 <div class="footer">
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
-        <span style="font-size: 2rem;">🌱</span>
+        <span style="font-size: 2rem; color: #FFD700;">🌱</span>
         <span style="font-weight: 800; font-size: 1.5rem; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
             FarmaBuddy AI Assistant
         </span>
-        <span style="font-size: 2rem;">🌾</span>
+        <span style="font-size: 2rem; color: #FFD700;">🌾</span>
     </div>
     <p style="margin: 0; color: white; font-size: 1rem; font-weight: 600;">
         FA-2 Project • 2026 • Empowering Farmers with AI Technology
     </p>
     <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-top: 5px;">
-        🚀 Built with Gemini AI • 🌈 Colorful UI/UX • 💡 Smart Farming Solutions
+        🚀 Built with Gemini AI • 🎨 Colorful UI/UX • 💡 Smart Farming Solutions
     </p>
     <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 0.8rem; margin-top: 10px;">
         Last Updated: {current_date} | Session ID: {session_id}
