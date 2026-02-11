@@ -14,86 +14,100 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Background */
+/* ===== GLOBAL DARK GREEN THEME ===== */
 .stApp {
-    background: linear-gradient(to bottom right, #eef7f0, #dff1e3);
-    color: #102216;
+    background: linear-gradient(135deg, #0f2e1a, #0a1f13);
+    color: #e8f5e9;
 }
 
-/* Force all text to be dark */
+/* Force clean readable text */
 html, body, [class*="css"]  {
-    color: #102216 !important;
+    color: #e8f5e9 !important;
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .main-header {
-    background: linear-gradient(90deg, #0f3d1f, #145c2c);
-    color: #ffffff;
-    padding: 2rem;
+    background: linear-gradient(90deg, #145c2c, #0f3d1f);
+    color: white;
+    padding: 2.5rem;
     border-radius: 20px;
     text-align: center;
     margin-bottom: 2rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
 
-/* Step cards */
+/* ===== STEP CARD ===== */
 .step-card {
-    background: #ffffff;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     margin-bottom: 1.5rem;
-    color: #102216;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Advice card */
+/* ===== AI RESPONSE CARD ===== */
 .advice-card {
-    background: #ffffff;
+    background: rgba(255,255,255,0.08);
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
     border-left: 6px solid #22c55e;
     margin-top: 1.5rem;
-    color: #102216;
+    font-size: 1.05rem;
 }
 
-/* Labels & inputs */
-label, .stSelectbox label, .stRadio label, .stTextInput label, .stTextArea label {
-    color: #102216 !important;
+/* ===== LABELS ===== */
+label {
+    color: #bbf7d0 !important;
     font-weight: 600;
 }
 
-/* Buttons */
+/* ===== INPUT FIELDS ===== */
+input, textarea, select {
+    background-color: #132f1e !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    border: 1px solid #1f4d2f !important;
+}
+
+/* ===== BUTTONS ===== */
 .stButton>button {
-    background-color: #22c55e;
-    color: #102216;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    color: #0a1f13;
     font-weight: 700;
-    border-radius: 12px;
-    padding: 0.8rem 1.5rem;
+    border-radius: 14px;
+    padding: 0.8rem 1.8rem;
     border: none;
+    box-shadow: 0 5px 15px rgba(34,197,94,0.4);
 }
 
 .stButton>button:hover {
-    background-color: #16a34a;
+    background: linear-gradient(90deg, #16a34a, #15803d);
     color: white;
 }
 
-/* Radio button text */
-div[role="radiogroup"] label {
-    color: #102216 !important;
+/* ===== RADIO & CHECKBOX TEXT ===== */
+div[role="radiogroup"] label,
+.stMultiSelect label {
+    color: #e8f5e9 !important;
 }
 
-/* Footer */
+/* ===== FOOTER ===== */
 .footer {
-    background: linear-gradient(90deg, #0f3d1f, #145c2c);
-    color: #ffffff;
+    background: linear-gradient(90deg, #145c2c, #0f3d1f);
+    color: white;
     padding: 1.5rem;
     border-radius: 20px;
     text-align: center;
     margin-top: 2rem;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
 
 </style>
 """, unsafe_allow_html=True)
+
 # ---------------- API ----------------
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("🔐 GOOGLE_API_KEY missing in Streamlit Secrets")
