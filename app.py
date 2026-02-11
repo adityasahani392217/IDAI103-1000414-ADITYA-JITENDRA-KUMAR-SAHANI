@@ -284,94 +284,99 @@ with col1:
     st.markdown("### 💡 Get AI-Powered Farming Advice")
     
     # Action button with enhanced styling
-    if st.button("🚀 Generate Smart Recommendations", use_container_width=True):
-        if not location:
-            st.warning("📍 Please enter your location to get personalized recommendations")
-        else:
-            try:
-                with st.spinner("🤖 AI is analyzing your farm data..."):
-                    # Build prompt
-                    prompt = f"""
-                    You are a professional agricultural advisor helping farmers.
+    # In the main action button section, fix the indentation:
 
-                    Farmer Profile:
-                    Country/Region: {region}
-                    Location: {location}
-                    Crop Stage: {crop_stage}
-                    Priorities: {', '.join(priority) if priority else "General Best Practices"}
+if st.button("🚀 Generate Smart Recommendations", use_container_width=True):
+    if not location:
+        st.warning("📍 Please enter your location to get personalized recommendations")
+    else:
+        try:
+            with st.spinner("🤖 AI is analyzing your farm data..."):
+                # Build prompt
+                prompt = f"""
+                You are a professional agricultural advisor helping farmers.
 
-                    INSTRUCTIONS:
-                    - Provide EXACTLY 3 clear farming recommendations.
-                    - Format each recommendation using this structure:
+                Farmer Profile:
+                Country/Region: {region}
+                Location: {location}
+                Crop Stage: {crop_stage}
+                Priorities: {', '.join(priority) if priority else "General Best Practices"}
 
-                    Recommendation 1:
-                    • Action:
-                    • Why:
+                INSTRUCTIONS:
+                - Provide EXACTLY 3 clear farming recommendations.
+                - Format each recommendation using this structure:
 
-                    Recommendation 2:
-                    • Action:
-                    • Why:
+                Recommendation 1:
+                • Action:
+                • Why:
 
-                    Recommendation 3:
-                    • Action:
-                    • Why:
+                Recommendation 2:
+                • Action:
+                • Why:
 
-                    - Keep language simple and practical.
-                    - Make advice region-specific.
-                    - Avoid unsafe chemical instructions.
-                    - Ensure full explanation.
-                    """
-                    
-                    # Get AI response
-                    response = client.models.generate_content(
-                        model="gemini-3-flash-preview",
-                        contents=prompt,
-                        config={
-                            "temperature": temperature,
-                            "max_output_tokens": 1024
-                        }
-                    )
-                    
-                    # Extract response
-                    if hasattr(response, "text") and response.text:
-                        full_output = response.text
-                    elif hasattr(response, "candidates"):
-                        try:
-                            full_output = response.candidates[0].content.parts[0].text
-                        except:
-                            full_output = "⚠️ Could not parse full response."
-                    else:
-                        full_output = "⚠️ No content returned."
-                    
-                    # Display recommendations in cards
-                    st.success("✅ AI Recommendations Generated Successfully!")
-                    st.markdown("---")
-                    st.markdown("### 📋 Your Personalized Farming Plan")
-                    
-                    # Split recommendations and display in cards
-                    recommendations = full_output.split('\n\n')
-                    for i, rec in enumerate(recommendations[:3], 1):
-                        if rec.strip():
-                            st.markdown(f"""
-                            <div class="recommendation-card">
-                                <h4>📌 Recommendation {i}</h4>
-                                {rec.replace('•', '➤').replace('Recommendation', '').strip()}
-                            </div>
-                            """, unsafe_allow_html=True)
-                    else:
-                        # Fallback display
+                Recommendation 3:
+                • Action:
+                • Why:
+
+                - Keep language simple and practical.
+                - Make advice region-specific.
+                - Avoid unsafe chemical instructions.
+                - Ensure full explanation.
+                """
+                
+                # Get AI response
+                response = client.models.generate_content(
+                    model="gemini-3-flash-preview",
+                    contents=prompt,
+                    config={
+                        "temperature": temperature,
+                        "max_output_tokens": 1024
+                    }
+                )
+                
+                # Extract response
+                if hasattr(response, "text") and response.text:
+                    full_output = response.text
+                elif hasattr(response, "candidates"):
+                    try:
+                        full_output = response.candidates[0].content.parts[0].text
+                    except:
+                        full_output = "⚠️ Could not parse full response."
+                else:
+                    full_output = "⚠️ No content returned."
+                
+                # Display recommendations in cards
+                st.success("✅ AI Recommendations Generated Successfully!")
+                st.markdown("---")
+                st.markdown("### 📋 Your Personalized Farming Plan")
+                
+                # Split recommendations and display in cards
+                recommendations = full_output.split('\n\n')
+                for i, rec in enumerate(recommendations[:3], 1):
+                    if rec.strip():
                         st.markdown(f"""
                         <div class="recommendation-card">
-                            <h4>📋 AI Recommendations</h4>
-                            {full_output}
+                            <h4 style="color: #2e7d32;">📌 Recommendation {i}</h4>
+                            <div class="recommendation-text ai-recommendations-content">
+                                {rec.replace('•', '➤').replace('Recommendation', '').strip()}
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
-                    
-            except Exception as e:
-                st.error("⚠️ Service Temporarily Unavailable")
-                with st.expander("Technical Details"):
-                    st.code(str(e))
-
+                else:
+                    # Fallback display
+                    st.markdown(f"""
+                    <div class="recommendation-card">
+                        <h4 style="color: #2e7d32;">📋 AI Recommendations</h4>
+                        <div class="recommendation-text ai-recommendations-content">
+                            {full_output}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+        except Exception as e:
+            st.error("⚠️ Service Temporarily Unavailable")
+            with st.expander("Technical Details"):
+                st.code(str(e))
 # In the CSS section, add these specific styles:
 # In the CSS section, add these styles:
 st.markdown("""
