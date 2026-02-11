@@ -23,6 +23,7 @@ if "GOOGLE_API_KEY" not in st.secrets:
     st.stop()
 
 api_key = st.secrets["GOOGLE_API_KEY"]
+client = genai.Client(api_key=api_key)
 
 # Add this temporary button to your sidebar to check names
 
