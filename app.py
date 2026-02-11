@@ -14,39 +14,57 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Background */
 .stApp {
-    background: linear-gradient(to bottom right, #f6f8f6, #eaf5ec);
+    background: linear-gradient(to bottom right, #eef7f0, #dff1e3);
+    color: #102216;
+}
+
+/* Force all text to be dark */
+html, body, [class*="css"]  {
+    color: #102216 !important;
 }
 
 /* Header */
 .main-header {
-    background: #102216;
-    color: white;
+    background: linear-gradient(90deg, #0f3d1f, #145c2c);
+    color: #ffffff;
     padding: 2rem;
     border-radius: 20px;
     text-align: center;
     margin-bottom: 2rem;
 }
 
+/* Step cards */
 .step-card {
-    background: white;
+    background: #ffffff;
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     margin-bottom: 1.5rem;
+    color: #102216;
 }
 
+/* Advice card */
 .advice-card {
     background: #ffffff;
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-    border-left: 6px solid #2bee6c;
+    border-left: 6px solid #22c55e;
     margin-top: 1.5rem;
+    color: #102216;
 }
 
+/* Labels & inputs */
+label, .stSelectbox label, .stRadio label, .stTextInput label, .stTextArea label {
+    color: #102216 !important;
+    font-weight: 600;
+}
+
+/* Buttons */
 .stButton>button {
-    background-color: #2bee6c;
+    background-color: #22c55e;
     color: #102216;
     font-weight: 700;
     border-radius: 12px;
@@ -55,21 +73,19 @@ st.markdown("""
 }
 
 .stButton>button:hover {
-    background-color: #26d95f;
-}
-
-.chat-box {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.footer {
-    background: #102216;
+    background-color: #16a34a;
     color: white;
+}
+
+/* Radio button text */
+div[role="radiogroup"] label {
+    color: #102216 !important;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(90deg, #0f3d1f, #145c2c);
+    color: #ffffff;
     padding: 1.5rem;
     border-radius: 20px;
     text-align: center;
@@ -78,7 +94,6 @@ st.markdown("""
 
 </style>
 """, unsafe_allow_html=True)
-
 # ---------------- API ----------------
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("🔐 GOOGLE_API_KEY missing in Streamlit Secrets")
