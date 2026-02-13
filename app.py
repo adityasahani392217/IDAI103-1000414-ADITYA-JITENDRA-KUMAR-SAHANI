@@ -3,308 +3,324 @@ import pandas as pd
 from datetime import datetime
 from google import genai
 
-# ================= CONFIG =================
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
 st.set_page_config(
-    page_title="🌾 FarmaBuddy",
+    page_title="🌾 AgroNova",
     page_icon="🌱",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ================= CLEAN PROFESSIONAL UI =================
+# -------------------------------------------------
+# CLEAN PREMIUM GREEN UI
+# -------------------------------------------------
 st.markdown("""
 <style>
-
-/* ---------- GLOBAL ---------- */
 * {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 .stApp {
-    background: linear-gradient(135deg, #F3F9F4 0%, #E9F5EC 100%);
+    background: linear-gradient(135deg, #071e14, #0c2f20);
+    color: #e8f5ec;
 }
 
-/* ---------- COLOR SYSTEM ---------- */
-:root {
-    --primary: #2E7D32;
-    --accent: #4CAF50;
-    --light: #F5FBF6;
-    --card: #FFFFFF;
-    --border: #E0E6E2;
-    --text: #1E1E1E;
+.block-container {
+    max-width: 1100px;
+    padding-top: 2rem;
 }
 
-/* ---------- HEADER ---------- */
+/* Header */
 .header-container {
-    background: var(--primary);
-    padding: 1.8rem 2.2rem;
-    border-radius: 18px;
+    background: linear-gradient(90deg, #0f3d28, #145c3a);
+    padding: 2rem;
+    border-radius: 20px;
     margin-bottom: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
-.title-text {
-    font-size: 2.6rem !important;
-    font-weight: 800 !important;
-    color: white !important;
-    margin: 0 !important;
+.header-container h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
 }
 
-.subtitle-text {
-    font-size: 1.1rem !important;
-    color: #C8E6C9 !important;
+.header-container p {
+    opacity: 0.8;
 }
 
-/* ---------- SIDEBAR ---------- */
-.sidebar .sidebar-content {
-    background: var(--primary);
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #0d2a1d;
 }
 
-.sidebar-header {
-    background: white;
-    color: var(--primary);
-    padding: 1rem;
-    border-radius: 12px;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-}
-
-/* ---------- INPUTS ---------- */
-div[data-baseweb="select"] > div,
-div[data-baseweb="input"] > div,
-div[data-baseweb="multiselect"] > div,
-textarea {
-    background: white !important;
-    border: 1.5px solid var(--border) !important;
-    border-radius: 10px !important;
-    padding: 8px 14px !important;
-}
-
-div[data-baseweb="select"] > div:hover,
-textarea:hover {
-    border-color: var(--accent) !important;
-}
-
-/* ---------- TABS ---------- */
-.stTabs [data-baseweb="tab-list"] {
-    background: var(--light);
-    border-radius: 50px;
-    padding: 6px;
-}
-
-.stTabs [data-baseweb="tab"] {
-    background: transparent !important;
-    color: var(--primary) !important;
-    font-weight: 600 !important;
-    border-radius: 30px !important;
-    padding: 10px 22px !important;
-}
-
-.stTabs [aria-selected="true"] {
-    background: var(--primary) !important;
-    color: white !important;
-}
-
-/* ---------- CARDS ---------- */
-.recommendation-card {
-    background: white;
-    border-radius: 14px;
+/* Cards */
+.card {
+    background: #0f3d28;
     padding: 1.5rem;
-    margin: 1.2rem 0;
-    border: 1px solid var(--border);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 1.2rem;
 }
 
-.recommendation-card h4 {
-    color: var(--primary);
-    font-size: 1.3rem;
-    font-weight: 700;
-}
-
-/* ---------- CHAT ---------- */
-.user-message, .ai-message {
-    padding: 1rem 1.4rem;
-    border-radius: 14px;
-    margin: 0.6rem 0;
-    font-size: 0.95rem;
-    border: 1px solid var(--border);
-}
-
-.user-message {
-    background: #E3F2FD;
-}
-
-.ai-message {
-    background: #E8F5E9;
-}
-
-/* ---------- BUTTON ---------- */
-.stButton > button {
-    background: var(--primary) !important;
-    color: white !important;
-    border-radius: 8px !important;
-    padding: 0.6rem 1.2rem !important;
-    font-weight: 600 !important;
-    border: none !important;
-}
-
-.stButton > button:hover {
-    background: var(--accent) !important;
-}
-
-/* ---------- FOOTER ---------- */
-.footer {
-    background: var(--primary);
-    padding: 1.5rem;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    padding: 0.7rem 1.4rem;
     color: white;
-    margin-top: 3rem;
 }
 
+.stButton>button:hover {
+    background: linear-gradient(90deg, #16a34a, #15803d);
+}
+
+/* Recommendation Card */
+.recommendation {
+    background: #0c3323;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border-left: 4px solid #22c55e;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Chat */
+.user-msg {
+    background: #1e3a8a;
+    padding: 1rem;
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
+}
+
+.ai-msg {
+    background: #0c3323;
+    padding: 1rem;
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid #22c55e;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 3rem;
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ================= API KEY =================
+# -------------------------------------------------
+# GEMINI API
+# -------------------------------------------------
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("🔐 API Key Missing - Add GOOGLE_API_KEY in Streamlit Secrets")
+    st.error("🔐 Add GOOGLE_API_KEY in Streamlit Secrets")
     st.stop()
 
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# ================= HEADER =================
+MODEL_NAME = "gemini-1.5-flash"   # Stable model
+
+# -------------------------------------------------
+# HEADER
+# -------------------------------------------------
 st.markdown("""
 <div class="header-container">
-    <div>
-        <h1 class="title-text">🌱 FarmaBuddy</h1>
-        <div class="subtitle-text">AI Smart Assistant for Farmers</div>
-    </div>
+    <h1>🌾 AgroNova</h1>
+    <p>AI-Powered Smart Farming Intelligence • Global & Region-Aware</p>
 </div>
 """, unsafe_allow_html=True)
 
-# ================= SIDEBAR =================
+# -------------------------------------------------
+# SIDEBAR SETTINGS
+# -------------------------------------------------
 with st.sidebar:
-    st.markdown('<div class="sidebar-header">🧑‍🌾 Farm Setup</div>', unsafe_allow_html=True)
+    st.header("Farm Configuration")
 
-    region = st.selectbox("Country", 
-        ["India", "Ghana", "Canada", "USA", "Australia", "Brazil", "Kenya", "France"])
-
-    location = st.text_input("State / Province", placeholder="e.g. Punjab")
-
-    crop_stage = st.selectbox("Crop Stage", 
-        ["Planning", "Sowing", "Growing", "Harvesting", "Post-Harvest"])
-
-    priority = st.multiselect(
-        "Goals",
-        ["Save Water", "High Yield", "Organic", "Low Cost", 
-         "Pest Control", "Soil Health", "Automation"]
+    country = st.selectbox(
+        "Country",
+        ["India", "Ghana", "Canada", "USA", "Brazil", "Australia"]
     )
 
-    temperature = st.slider("AI Creativity", 0.2, 0.9, 0.5)
+    location = st.text_input("State / Province")
 
-# ================= SESSION =================
+    crop_stage = st.selectbox(
+        "Crop Stage",
+        ["Planning", "Sowing", "Growing", "Harvesting", "Storage"]
+    )
+
+    priorities = st.multiselect(
+        "Goals",
+        ["High Yield", "Low Cost", "Organic", "Water Saving",
+         "Pest Control", "Soil Health"]
+    )
+
+    temperature = st.slider(
+        "AI Creativity",
+        0.2, 0.8, 0.4,
+        help="Lower = safer advice | Higher = creative suggestions"
+    )
+
+# -------------------------------------------------
+# SESSION STATE
+# -------------------------------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# ================= TABS =================
-tab1, tab2 = st.tabs(["Get Advice", "Chat with AI"])
+# -------------------------------------------------
+# MAIN TABS
+# -------------------------------------------------
+tab1, tab2 = st.tabs(["Farm Plan", "Chat Assistant"])
 
-# ================= RECOMMENDATION TAB =================
+# =================================================
+# TAB 1 — FARM PLAN
+# =================================================
 with tab1:
-    st.subheader("Farm Recommendations")
 
-    if st.button("Generate Farm Plan", use_container_width=True):
+    st.subheader("Generate Smart Farm Plan")
+
+    if st.button("Generate Recommendations"):
+
         if not location:
-            st.warning("Please enter location.")
+            st.warning("Please enter your state/province.")
         else:
-            prompt = f"""
+            try:
+                with st.spinner("Analyzing farm conditions..."):
+
+                    prompt = f"""
 You are an expert agricultural advisor.
 
-Region: {region}
-Location: {location}
-Crop stage: {crop_stage}
-Farmer goals: {', '.join(priority) if priority else 'General'}
+Farmer Context:
+Country: {country}
+State: {location}
+Crop Stage: {crop_stage}
+Goals: {', '.join(priorities) if priorities else 'General productivity'}
 
-Give exactly 3 farming recommendations:
-Each must include:
-- Action:
-- Why:
+Provide EXACTLY 3 farming recommendations.
 
-Use simple words. Avoid unsafe chemicals.
+Format strictly:
+
+Recommendation 1:
+• Action:
+• Why:
+
+Recommendation 2:
+• Action:
+• Why:
+
+Recommendation 3:
+• Action:
+• Why:
+
+Use simple language.
+Be region-specific.
+Avoid unsafe chemical instructions.
 """
-            try:
-                with st.spinner("Generating advice..."):
+
                     response = client.models.generate_content(
-                        model="gemini-3-flash-preview",
+                        model=MODEL_NAME,
                         contents=prompt,
                         config={
                             "temperature": temperature,
-                            "max_output_tokens": 1024
+                            "max_output_tokens": 900
                         }
                     )
-                    output = response.text if hasattr(response, "text") else "No response"
-                    recommendations = output.split("\n\n")
 
-                    for i, rec in enumerate(recommendations[:3], 1):
-                        st.markdown(f"""
-                        <div class="recommendation-card">
-                            <h4>Recommendation {i}</h4>
-                            <p>{rec}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
+                    if hasattr(response, "text") and response.text:
+                        recommendations = response.text.split("\n\n")
+                    else:
+                        recommendations = ["⚠️ No response received."]
 
-            except:
-                st.error("AI service temporarily unavailable.")
+                    st.success("Farm plan ready!")
 
-# ================= CHAT TAB =================
+                    for rec in recommendations[:3]:
+                        if rec.strip():
+                            st.markdown(f"""
+                            <div class="recommendation">
+                            {rec}
+                            </div>
+                            """, unsafe_allow_html=True)
+
+            except Exception:
+                st.error("⚠️ AI service temporarily unavailable.")
+
+# =================================================
+# TAB 2 — CHAT ASSISTANT
+# =================================================
 with tab2:
-    st.subheader("Chat with FarmaBuddy")
+
+    st.subheader("Ask AgroNova")
 
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
-            st.markdown(f'<div class="user-message"><strong>You:</strong> {msg["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="user-msg"><b>You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div class="ai-message"><strong>AI:</strong> {msg["content"]}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ai-msg"><b>AgroNova:</b> {msg["content"]}</div>', unsafe_allow_html=True)
 
-    user_q = st.text_input("Ask a farming question")
+    user_input = st.text_input("Ask your farming question")
 
-    if st.button("Send"):
-        if user_q:
-            st.session_state.chat_history.append({"role": "user", "content": user_q})
-            try:
-                with st.spinner("AI thinking..."):
-                    full_prompt = f"""
-You are a helpful farming assistant.
+    if st.button("Send") and user_input:
 
-Region: {region}
-Location: {location}
-Stage: {crop_stage}
-Goals: {', '.join(priority)}
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
 
-User question: {user_q}
+        try:
+            with st.spinner("AgroNova is thinking..."):
 
-Answer simply and clearly.
+                prompt = f"""
+You are AgroNova, an agricultural AI assistant.
+
+Farmer Context:
+Country: {country}
+State: {location}
+Crop Stage: {crop_stage}
+Goals: {', '.join(priorities) if priorities else 'General'}
+
+Answer clearly and simply.
+Avoid unsafe instructions.
+Focus on practical advice.
+
+User question:
+{user_input}
 """
-                    response = client.models.generate_content(
-                        model="gemini-3-flash-preview",
-                        contents=full_prompt,
-                        config={
-                            "temperature": temperature,
-                            "max_output_tokens": 1024
-                        }
-                    )
-                    reply = response.text if hasattr(response, "text") else "Please rephrase."
-                    st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                    st.rerun()
-            except:
-                st.session_state.chat_history.append({"role": "assistant", "content": "AI busy. Try again."})
+
+                response = client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=prompt,
+                    config={
+                        "temperature": temperature,
+                        "max_output_tokens": 800
+                    }
+                )
+
+                if hasattr(response, "text") and response.text:
+                    reply = response.text
+                else:
+                    reply = "I could not generate a response."
+
+                st.session_state.chat_history.append({"role": "assistant", "content": reply})
                 st.rerun()
 
-# ================= FOOTER =================
+        except Exception:
+            st.session_state.chat_history.append(
+                {"role": "assistant", "content": "⚠️ AI service busy. Try again."}
+            )
+            st.rerun()
+
+    if st.session_state.chat_history:
+        if st.button("Clear Chat"):
+            st.session_state.chat_history = []
+            st.rerun()
+
+# -------------------------------------------------
+# FOOTER
+# -------------------------------------------------
 st.markdown(f"""
 <div class="footer">
-    🌾 FarmaBuddy • Smart Farming AI • {datetime.now().year}
+AgroNova • AI Smart Farming Assistant • {datetime.now().year}
 </div>
 """, unsafe_allow_html=True)
