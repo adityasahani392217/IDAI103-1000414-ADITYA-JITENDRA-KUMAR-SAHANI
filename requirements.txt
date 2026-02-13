@@ -4,3 +4,6 @@ requests
 streamlit
 pandas
 google-genai
+SimpleDocTemplate
+Paragraph
+Spacer
