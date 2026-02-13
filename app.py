@@ -61,28 +61,21 @@ if "GOOGLE_API_KEY" not in st.secrets:
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # =====================================================
-# AUTO-DETECT WORKING MODEL
+# MODEL CONFIG (FOR YOUR ACCOUNT)
 # =====================================================
-SUPPORTED_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro"]
 
-def get_model():
-    for m in SUPPORTED_MODELS:
-        try:
-            client.models.generate_content(
-                model=m,
-                contents="test",
-                config={"max_output_tokens":5}
-            )
-            return m
-        except:
-            continue
-    return None
+MODEL_NAME = "gemini-3-flash-preview"
 
-MODEL_NAME = get_model()
-
-if MODEL_NAME is None:
-    st.error("No supported Gemini model available.")
+try:
+    client.models.generate_content(
+        model=MODEL_NAME,
+        contents="test",
+        config={"max_output_tokens": 5}
+    )
+except Exception as e:
+    st.error("Gemini model not accessible. Check API key permissions.")
     st.stop()
+
 
 # =====================================================
 # HEADER
