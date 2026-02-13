@@ -1,36 +1,98 @@
 import streamlit as st
+import pandas as pd
 import requests
 from datetime import datetime
 from google import genai
 from google.genai import types
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate
 from io import BytesIO
 
 # =====================================================
-# CONFIG
+# PAGE CONFIG
 # =====================================================
-st.set_page_config(page_title="🌾 AgroNova", layout="wide")
-
-MODEL_NAME = "gemini-1.5-flash"
+st.set_page_config(
+    page_title="🌾 AgroNova",
+    page_icon="🌱",
+    layout="wide"
+)
 
 # =====================================================
-# API SETUP
+# PREMIUM CLEAN GREEN UI
+# =====================================================
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg,#071e14,#0c2f20);
+    color:#e8f5ec;
+}
+.block-container {max-width:1100px;padding-top:2rem;}
+.header {
+    background:linear-gradient(90deg,#0f3d28,#145c3a);
+    padding:2rem;border-radius:16px;margin-bottom:2rem;
+}
+.card {
+    background:#0f3d28;
+    padding:1.5rem;border-radius:14px;margin-bottom:1rem;
+}
+.recommendation {
+    background:#0c3323;
+    padding:1.2rem;border-left:4px solid #22c55e;
+    border-radius:12px;margin-bottom:1rem;
+}
+.safe {color:#22c55e;font-weight:600;}
+.caution {color:#facc15;font-weight:600;}
+.danger {color:#ef4444;font-weight:600;}
+.footer {text-align:center;margin-top:3rem;opacity:0.7;}
+</style>
+""", unsafe_allow_html=True)
+
+# =====================================================
+# API KEY
 # =====================================================
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("Add GOOGLE_API_KEY in Streamlit Secrets.")
+    st.error("Add GOOGLE_API_KEY in Streamlit Secrets")
     st.stop()
 
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # =====================================================
+# AUTO-DETECT WORKING MODEL
+# =====================================================
+SUPPORTED_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro"]
+
+def get_model():
+    for m in SUPPORTED_MODELS:
+        try:
+            client.models.generate_content(
+                model=m,
+                contents="test",
+                config={"max_output_tokens":5}
+            )
+            return m
+        except:
+            continue
+    return None
+
+MODEL_NAME = get_model()
+
+if MODEL_NAME is None:
+    st.error("No supported Gemini model available.")
+    st.stop()
+
+# =====================================================
 # HEADER
 # =====================================================
-st.title("🌾 AgroNova – Smart Farming Intelligence")
-st.caption("Weather-Aware • Image Analysis • Model Comparison")
-
-st.warning("This is an educational project. Permission required for real agricultural deployment.")
+st.markdown("""
+<div class="header">
+<h1>🌾 AgroNova – Elite Production System</h1>
+<p>Weather-Aware • Multimodal • Safety Validated • Enterprise Architecture</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =====================================================
 # SIDEBAR
@@ -38,210 +100,185 @@ st.warning("This is an educational project. Permission required for real agricul
 with st.sidebar:
     st.header("Farm Configuration")
 
-    language = st.selectbox("Language", ["English", "Hindi"])
-
     country = st.selectbox("Country",
-                           ["India", "Ghana", "Canada", "USA", "Brazil", "Australia"])
+        ["India","Ghana","Canada","USA","Brazil","Australia"])
 
     state = st.text_input("State / Province")
 
     crop_stage = st.selectbox("Crop Stage",
-                              ["Planning", "Sowing", "Growing", "Harvesting", "Storage"])
+        ["Planning","Sowing","Growing","Harvesting","Storage"])
 
     goals = st.multiselect("Goals",
-                           ["High Yield", "Low Cost", "Organic",
-                            "Water Saving", "Pest Control", "Soil Health"])
+        ["High Yield","Low Cost","Organic","Water Saving","Pest Control","Soil Health"])
 
-    weather_key = st.text_input("OpenWeather API Key", type="password")
+    weather_api = st.text_input("Weather API Key (OpenWeather)")
 
-    creativity = st.slider("AI Creativity", 0.2, 0.8, 0.4)
+    temperature = st.slider("AI Creativity",0.2,0.8,0.4)
 
 # =====================================================
-# WEATHER
+# WEATHER INTEGRATION
 # =====================================================
 def get_weather(city, key):
-    if not key or not city:
+    if not city or not key:
         return "Weather data unavailable."
-
     try:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=metric"
-        r = requests.get(url)
-        data = r.json()
-
-        if "main" not in data:
-            return "Weather data unavailable."
-
-        return f"""
-Temperature: {data['main']['temp']}°C  
-Humidity: {data['main']['humidity']}%  
-Condition: {data['weather'][0]['description']}
-"""
+        url=f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=metric"
+        r=requests.get(url).json()
+        if "weather" in r:
+            return f"{r['weather'][0]['main']}, {r['main']['temp']}°C"
+        return "Weather unavailable."
     except:
-        return "Weather service error."
+        return "Weather unavailable."
 
-weather_info = get_weather(state, weather_key)
-
-# =====================================================
-# IMAGE UPLOAD
-# =====================================================
-uploaded_image = st.file_uploader(
-    "Upload Crop Image (optional)",
-    type=["jpg", "jpeg", "png"]
-)
+weather_summary = get_weather(state, weather_api)
 
 # =====================================================
-# USER QUESTION
+# MULTIMODAL CONTENT BUILDER
 # =====================================================
-question = st.text_area("Describe your farming issue")
+def build_contents(prompt_text, image_file):
+    if image_file:
+        img_bytes=image_file.read()
+        return [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(prompt_text),
+                    types.Part.from_bytes(
+                        data=img_bytes,
+                        mime_type=image_file.type
+                    )
+                ]
+            )
+        ]
+    return prompt_text
 
 # =====================================================
-# GENERATE
+# PDF GENERATOR
 # =====================================================
-if st.button("Generate Analysis"):
+def generate_pdf(text):
+    buffer=BytesIO()
+    doc=SimpleDocTemplate(buffer)
+    styles=getSampleStyleSheet()
+    story=[]
+    story.append(Paragraph(text, styles["Normal"]))
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
+# =====================================================
+# MAIN AREA
+# =====================================================
+uploaded_image = st.file_uploader("Upload crop image for pest detection", type=["jpg","png","jpeg"])
+
+question = st.text_area("Describe your farm issue")
+
+if st.button("Generate Elite Farm Plan"):
 
     if not state:
-        st.warning("Enter location first.")
-        st.stop()
-
-    base_prompt = f"""
-You are an agricultural advisory assistant.
+        st.warning("Please enter state/province.")
+    else:
+        base_prompt=f"""
+You are AgroNova, an expert agricultural AI advisor.
 
 Farmer Context:
 Country: {country}
 State: {state}
 Crop Stage: {crop_stage}
-Goals: {', '.join(goals) if goals else 'General productivity'}
+Goals: {', '.join(goals) if goals else 'General'}
+Current Weather: {weather_summary}
 
-Weather:
-{weather_info}
+Provide EXACTLY 3 recommendations:
 
-User Question:
-{question}
+Recommendation 1:
+• Action:
+• Why:
 
-Instructions:
-- Provide exactly 3 recommendations.
-- Each must contain Action and Why.
-- Use simple language.
-- Respond in {language}.
-- Avoid unsafe chemical instructions.
+Recommendation 2:
+• Action:
+• Why:
+
+Recommendation 3:
+• Action:
+• Why:
+
+Use simple language.
+Avoid unsafe chemicals.
 """
 
-    try:
+        contents=build_contents(base_prompt, uploaded_image)
 
-        # Build content correctly
-        if uploaded_image:
-            image_bytes = uploaded_image.read()
+        try:
+            with st.spinner("Running dual model validation..."):
 
-            contents = [
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_text(base_prompt),
-                        types.Part.from_bytes(
-                            data=image_bytes,
-                            mime_type=uploaded_image.type
-                        )
-                    ]
+                # Low temperature
+                response_low=client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=contents,
+                    config={"temperature":0.3,"max_output_tokens":900}
                 )
-            ]
-        else:
-            contents = base_prompt
 
-        with st.spinner("Generating comparison..."):
-
-            response_low = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    temperature=0.3,
-                    max_output_tokens=900
+                # High temperature
+                response_high=client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=contents,
+                    config={"temperature":0.7,"max_output_tokens":900}
                 )
-            )
 
-            response_high = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    temperature=0.7,
-                    max_output_tokens=900
-                )
-            )
+                text_low=response_low.text if hasattr(response_low,"text") else ""
+                text_high=response_high.text if hasattr(response_high,"text") else ""
 
-        col1, col2 = st.columns(2)
+                st.success("Comparison Generated")
 
-        with col1:
-            st.subheader("Conservative Model (0.3)")
-            st.markdown(response_low.text)
+                col1,col2=st.columns(2)
 
-        with col2:
-            st.subheader("Creative Model (0.7)")
-            st.markdown(response_high.text)
+                with col1:
+                    st.subheader("Stable Output (0.3)")
+                    st.markdown(f'<div class="recommendation">{text_low}</div>',unsafe_allow_html=True)
 
-        # =====================================================
-        # SAFETY CHECK
-        # =====================================================
-        safety_prompt = f"""
-Classify this advice as:
-Green (Safe)
-Yellow (Caution)
-Red (Unsafe)
+                with col2:
+                    st.subheader("Creative Output (0.7)")
+                    st.markdown(f'<div class="recommendation">{text_high}</div>',unsafe_allow_html=True)
+
+                # SAFETY CLASSIFICATION
+                safety_prompt=f"""
+Classify this advice as SAFE, CAUTION, or UNSAFE:
+
+{text_low}
 
 Return only one word.
-
-Advice:
-{response_low.text}
 """
+                safety=client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=safety_prompt
+                )
 
-        safety = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=safety_prompt,
-            config=types.GenerateContentConfig(temperature=0.1)
-        )
+                label=safety.text.strip().upper()
 
-        st.subheader("Safety Indicator")
-        st.info(safety.text)
+                if "SAFE" in label:
+                    st.markdown('<p class="safe">🟢 Safety Status: SAFE</p>',unsafe_allow_html=True)
+                elif "CAUTION" in label:
+                    st.markdown('<p class="caution">🟡 Safety Status: CAUTION</p>',unsafe_allow_html=True)
+                else:
+                    st.markdown('<p class="danger">🔴 Safety Status: UNSAFE</p>',unsafe_allow_html=True)
 
-        # =====================================================
-        # PDF EXPORT
-        # =====================================================
-        def create_pdf(text):
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=A4)
-            styles = getSampleStyleSheet()
-            elements = []
-            elements.append(Paragraph("AgroNova Farm Report", styles["Heading1"]))
-            elements.append(Spacer(1, 12))
-            elements.append(Paragraph(text.replace("\n", "<br/>"), styles["Normal"]))
-            doc.build(elements)
-            buffer.seek(0)
-            return buffer
+                # PDF EXPORT
+                pdf_buffer=generate_pdf(text_low)
+                st.download_button(
+                    label="Download Farm Report (PDF)",
+                    data=pdf_buffer,
+                    file_name="AgroNova_Report.pdf",
+                    mime="application/pdf"
+                )
 
-        pdf = create_pdf(response_low.text)
-
-        st.download_button(
-            "Download PDF Report",
-            data=pdf,
-            file_name="AgroNova_Report.pdf",
-            mime="application/pdf"
-        )
-
-        # =====================================================
-        # VOICE OUTPUT
-        # =====================================================
-        st.markdown(f"""
-        <script>
-        var msg = new SpeechSynthesisUtterance(`{response_low.text}`);
-        msg.lang = "{'hi-IN' if language=='Hindi' else 'en-IN'}";
-        window.speechSynthesis.speak(msg);
-        </script>
-        """, unsafe_allow_html=True)
-
-    except Exception as e:
-        st.error("AI service temporarily unavailable.")
-        st.code(str(e))
+        except Exception as e:
+            st.error("AI service temporarily unavailable.")
+            st.code(str(e))
 
 # =====================================================
 # FOOTER
 # =====================================================
-st.markdown("---")
-st.caption(f"AgroNova • Educational Smart Farming System • {datetime.now().year}")
+st.markdown(f"""
+<div class="footer">
+AgroNova • Elite AI Agricultural Intelligence • {datetime.now().year}
+</div>
+""", unsafe_allow_html=True)
