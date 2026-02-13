@@ -11,6 +11,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ---------------- CONSTANTS ----------------
+CREATIVE_THRESHOLD = 0.7  # Temperature threshold for "Very Creative"
+BALANCED_THRESHOLD = 0.4  # Temperature threshold for "Balanced"
+
 # ---------- FONT AWESOME + ENHANCED CSS ----------
 st.markdown("""
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -346,7 +350,7 @@ st.markdown("""
     /* Tab icons via pseudo-elements */
     .stTabs [data-baseweb="tab"]:nth-child(1)::before {
         font-family: "Font Awesome 6 Free";
-        content: "\\f0ae";
+        content: "\\f0ae";  /* list-check icon */
         font-weight: 900;
         font-size: 1.4rem;
         margin-right: 6px;
@@ -356,7 +360,7 @@ st.markdown("""
     
     .stTabs [data-baseweb="tab"]:nth-child(2)::before {
         font-family: "Font Awesome 6 Free";
-        content: "\\f544";
+        content: "\\f544";  /* robot icon */
         font-weight: 900;
         font-size: 1.4rem;
         margin-right: 6px;
@@ -397,7 +401,6 @@ st.markdown("""
         border-radius: 30px 30px 30px 0;
         padding: 1.8rem 2rem;
         margin: 1.5rem 0;
-        border-left: 12px solid var(--green);
         border: 1px solid var(--glass-border);
         border-left: 12px solid var(--green);
         box-shadow: 0 8px 32px rgba(46, 125, 50, 0.15),
@@ -630,7 +633,6 @@ st.markdown("""
         -webkit-backdrop-filter: blur(10px);
         border-radius: 20px;
         padding: 1.4rem 0.5rem;
-        border-bottom: 10px solid var(--yellow);
         border: 1px solid var(--glass-border);
         border-bottom: 10px solid var(--yellow);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -868,7 +870,6 @@ st.markdown("""
         background: var(--glass-bg);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-left: 8px solid var(--yellow);
         border-radius: 20px;
         padding: 1.5rem;
         margin-top: 1rem;
@@ -1252,7 +1253,7 @@ with st.sidebar:
         help="More creative = surprising ideas, Consistent = safe advice"
     )
     creativity_percent = int((temperature - 0.2) / 0.7 * 100)
-    creativity_label = "🎨 Very Creative" if temperature > 0.7 else "⚖️ Balanced" if temperature > 0.4 else "🎯 Focused"
+    creativity_label = "🎨 Very Creative" if temperature > CREATIVE_THRESHOLD else "⚖️ Balanced" if temperature > BALANCED_THRESHOLD else "🎯 Focused"
     st.markdown(f"""
     <div style="background: var(--yellow-gradient); padding: 0.8rem; border-radius: 30px; text-align: center; border:4px solid white; margin-top: 0.5rem; box-shadow: 0 4px 15px rgba(255, 190, 11, 0.3); transition: all 0.3s ease; animation: fadeIn 0.5s ease-out;">
         <span style="font-weight:800; font-size:1.4rem; color:black;">✨ {creativity_percent}% creative</span>
@@ -1363,14 +1364,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Performance optimization: Use GPU acceleration
+// Performance optimization: Use GPU acceleration sparingly
+// Only apply to elements that are frequently animated
 const style = document.createElement('style');
 style.textContent = `
-    .recommendation-card,
-    .farm-tile,
-    .user-message,
-    .ai-message,
-    .stButton > button {
+    .stButton > button:hover,
+    .recommendation-card:hover,
+    .farm-tile:hover {
         will-change: transform;
         transform: translateZ(0);
         backface-visibility: hidden;
@@ -1412,7 +1412,7 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
     with col_tile4:
-        creativity_icon = "🎨" if temperature > 0.6 else "⚖️" if temperature > 0.4 else "🎯"
+        creativity_icon = "🎨" if temperature > CREATIVE_THRESHOLD else "⚖️" if temperature > BALANCED_THRESHOLD else "🎯"
         st.markdown(f"""
         <div class="farm-tile">
             <i class="fas fa-brain"></i>
