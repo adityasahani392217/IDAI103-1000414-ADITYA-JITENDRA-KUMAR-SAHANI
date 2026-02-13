@@ -1,208 +1,240 @@
 import streamlit as st
 import requests
-from google import genai
+import pandas as pd
 from datetime import datetime
+from google import genai
+from google.genai import types
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Spacer
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
-from reportlab.platypus import SimpleDocTemplate
-from reportlab.platypus import Paragraph
-from reportlab.platypus import Spacer
+from reportlab.lib.pagesizes import A4
+from io import BytesIO
 
+# =========================================================
+# CONFIG
+# =========================================================
 st.set_page_config(page_title="🌾 AgroNova FA-3", layout="wide")
 
-# ---------------------------
-# API CONFIG
-# ---------------------------
+MODEL_NAME = "models/gemini-1.5-flash"
+
+# =========================================================
+# API SETUP
+# =========================================================
 if "GOOGLE_API_KEY" not in st.secrets:
     st.error("Add GOOGLE_API_KEY in Streamlit Secrets")
     st.stop()
 
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
-MODEL_NAME = "gemini-1.5-flash"
 
-# ---------------------------
+# =========================================================
 # HEADER
-# ---------------------------
+# =========================================================
 st.title("🌾 AgroNova – FA-3 Production System")
-st.caption("Weather-Aware • Multimodal • FA-1 + FA-2 Optimized")
+st.caption("Weather-Aware • Multimodal • Model Validation • PDF Export")
 
-# ---------------------------
-# SIDEBAR INPUTS
-# ---------------------------
+# =========================================================
+# SIDEBAR CONFIG
+# =========================================================
 with st.sidebar:
     st.header("Farm Configuration")
 
-    country = st.selectbox("Country", ["India", "Ghana", "USA", "Canada"])
+    language = st.selectbox("Language", ["English", "Hindi", "French"])
+
+    country = st.selectbox(
+        "Country",
+        ["India", "Ghana", "Canada", "USA", "Brazil", "Australia"]
+    )
+
     state = st.text_input("State / Province")
-    crop_stage = st.selectbox("Crop Stage", ["Planning","Sowing","Growing","Harvesting"])
-    goals = st.multiselect("Goals", ["High Yield","Low Cost","Organic","Water Saving"])
 
-    weather_api_key = st.text_input("Weather API Key (OpenWeather)", type="password")
+    crop_stage = st.selectbox(
+        "Crop Stage",
+        ["Planning", "Sowing", "Growing", "Harvesting", "Storage"]
+    )
 
-# ---------------------------
-# WEATHER API
-# ---------------------------
-weather_data = ""
-if weather_api_key and state:
+    goals = st.multiselect(
+        "Goals",
+        ["High Yield", "Low Cost", "Organic", "Water Saving",
+         "Pest Control", "Soil Health"]
+    )
+
+    weather_key = st.text_input("Weather API Key (OpenWeather)", type="password")
+
+    temperature = st.slider("AI Creativity", 0.2, 0.8, 0.4)
+
+# =========================================================
+# WEATHER FUNCTION
+# =========================================================
+def get_weather(city, api_key):
+    if not api_key:
+        return "No weather data (API key missing)."
+
     try:
-        url = f"http://api.openweathermap.org/data/2.5/weather?q={state}&appid={weather_api_key}&units=metric"
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
         response = requests.get(url)
         data = response.json()
-        rainfall = data.get("rain", {}).get("1h", 0)
-        temp = data["main"]["temp"]
-        weather_data = f"Temperature: {temp}°C, Rainfall last hour: {rainfall}mm"
-        st.info(f"🌦 Weather Injected: {weather_data}")
+
+        if "main" not in data:
+            return "Weather data unavailable."
+
+        return f"""
+Temperature: {data['main']['temp']}°C  
+Humidity: {data['main']['humidity']}%  
+Condition: {data['weather'][0]['description']}
+"""
     except:
-        st.warning("Weather API failed")
+        return "Weather API error."
 
-# ---------------------------
+weather_info = get_weather(state, weather_key) if state else "No location provided."
+
+# =========================================================
 # IMAGE UPLOAD (MULTIMODAL)
-# ---------------------------
-uploaded_image = st.file_uploader("Upload crop image for pest detection", type=["jpg","png","jpeg"])
+# =========================================================
+uploaded_image = st.file_uploader(
+    "Upload crop image for pest detection",
+    type=["jpg", "jpeg", "png"]
+)
 
-image_context = ""
-if uploaded_image:
-    image_context = "An image has been uploaded for pest analysis."
-    st.image(uploaded_image, caption="Uploaded Crop Image")
+# =========================================================
+# USER INPUT
+# =========================================================
+user_query = st.text_area("Describe your farm issue")
 
-# ---------------------------
-# USER QUESTION
-# ---------------------------
-question = st.text_area("Describe your farm issue")
+# =========================================================
+# MAIN BUTTON
+# =========================================================
+if st.button("Generate FA-3 Analysis"):
 
-# ---------------------------
-# GENERATE
-# ---------------------------
-if st.button("Generate AI Plan"):
+    if not state:
+        st.warning("Please enter your location.")
+        st.stop()
 
     base_prompt = f"""
-You are AgroNova agricultural AI.
+You are AgroNova, an agricultural AI system.
 
 Farmer Context:
 Country: {country}
 State: {state}
 Crop Stage: {crop_stage}
-Goals: {', '.join(goals)}
-Weather Data: {weather_data}
-Image Context: {image_context}
+Goals: {', '.join(goals) if goals else 'General productivity'}
+
+Weather Forecast:
+{weather_info}
 
 User Question:
-{question}
+{user_query}
 
-Rules:
-- 3 recommendations
-- Each must include Action + Why
-- No unsafe chemical dosages
-- Simple language
+Instructions:
+- Provide EXACTLY 3 farming recommendations.
+- Each must include Action and Why.
+- Use simple language.
+- Respond strictly in {language}.
+- Avoid unsafe chemical instructions.
 """
 
-    # Conservative Model
-    response_low = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=base_prompt,
-        config={"temperature":0.3}
-    )
+    # =====================================================
+    # CONTENT BUILD (Multimodal)
+    # =====================================================
+    contents = [base_prompt]
 
-    # Creative Model
-    response_high = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=base_prompt,
-        config={"temperature":0.7}
-    )
+    if uploaded_image:
+        image_part = types.Part.from_bytes(
+            uploaded_image.read(),
+            mime_type=uploaded_image.type
+        )
+        contents.append(image_part)
+
+    # =====================================================
+    # MODEL COMPARISON
+    # =====================================================
+    with st.spinner("Generating model comparison..."):
+
+        response_low = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=contents,
+            config={"temperature": 0.3, "max_output_tokens": 900}
+        )
+
+        response_high = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=contents,
+            config={"temperature": 0.7, "max_output_tokens": 900}
+        )
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("Model A (Safe)")
-        st.write(response_low.text)
+        st.subheader("Model A (Safe Mode – 0.3)")
+        st.markdown(response_low.text)
 
     with col2:
-        st.subheader("Model B (Creative)")
-        st.write(response_high.text)
+        st.subheader("Model B (Creative Mode – 0.7)")
+        st.markdown(response_high.text)
 
-    # ---------------------------
-    # SAFETY CLASSIFICATION
-    # ---------------------------
-    risk_score = "🟢 Green"
-    if "chemical" in response_low.text.lower():
-        risk_score = "🟡 Yellow"
-    if "pesticide dosage" in response_low.text.lower():
-        risk_score = "🔴 Red"
+    # =====================================================
+    # SAFETY VALIDATION PASS
+    # =====================================================
+    safety_prompt = f"""
+Classify the safety of this farming advice.
 
-    st.success(f"Safety Classification: {risk_score}")
+Return one word only:
+Green (Safe)
+Yellow (Caution)
+Red (Unsafe)
 
-    # ---------------------------
+Advice:
+{response_low.text}
+"""
+
+    safety_response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=safety_prompt,
+        config={"temperature": 0.1}
+    )
+
+    st.subheader("Safety Classification")
+    st.info(safety_response.text)
+
+    # =====================================================
     # PDF EXPORT
-    # ---------------------------
-    doc = SimpleDocTemplate("AgroNova_Report.pdf")
-    styles = getSampleStyleSheet()
-    elements = []
-    elements.append(Paragraph("AgroNova Farm Report", styles["Heading1"]))
-    elements.append(Spacer(1, 0.5*inch))
-    elements.append(Paragraph(response_low.text, styles["Normal"]))
-    doc.build(elements)
+    # =====================================================
+    def generate_pdf(text):
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        styles = getSampleStyleSheet()
+        elements = []
+        elements.append(Paragraph("AgroNova FA-3 Report", styles['Heading1']))
+        elements.append(Spacer(1, 12))
+        elements.append(Paragraph(text.replace("\n", "<br/>"), styles['Normal']))
+        doc.build(elements)
+        buffer.seek(0)
+        return buffer
 
-    with open("AgroNova_Report.pdf", "rb") as f:
-        st.download_button("Download PDF Report", f, "AgroNova_Report.pdf")
+    pdf_file = generate_pdf(response_low.text)
 
-# ---------------------------
+    st.download_button(
+        label="Download Farm Report (PDF)",
+        data=pdf_file,
+        file_name="AgroNova_Report.pdf",
+        mime="application/pdf"
+    )
+
+    # =====================================================
+    # VOICE OUTPUT (Browser Speech)
+    # =====================================================
+    st.markdown(f"""
+    <script>
+    var msg = new SpeechSynthesisUtterance(`{response_low.text}`);
+    msg.lang = "{'hi-IN' if language=='Hindi' else 'fr-FR' if language=='French' else 'en-IN'}";
+    window.speechSynthesis.speak(msg);
+    </script>
+    """, unsafe_allow_html=True)
+
+# =========================================================
 # FOOTER
-# ---------------------------
+# =========================================================
 st.markdown("---")
-st.caption(f"AgroNova FA-3 • {datetime.now().year}")
+st.caption(f"AgroNova FA-3 Production System • {datetime.now().year}")
