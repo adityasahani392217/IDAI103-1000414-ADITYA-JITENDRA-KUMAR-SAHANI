@@ -1,9 +1,4 @@
 streamlit
-pandas
+google-generativeai
 requests
-streamlit
-pandas
-google-genai
-SimpleDocTemplate
-Paragraph
-Spacer
+reportlab
