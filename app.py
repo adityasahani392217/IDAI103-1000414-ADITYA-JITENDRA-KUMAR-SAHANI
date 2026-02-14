@@ -45,9 +45,7 @@ client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 # MODEL ROUTER
 # ======================================================
 AVAILABLE_MODELS = [
-    "models/gemini-1.5-flash",
-    "models/gemini-1.5-pro",
-    "models/gemini-3-flash-preview"
+    "gemini-3-flash-preview"
 ]
 
 def get_working_model():
