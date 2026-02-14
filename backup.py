@@ -1,326 +1,208 @@
 import streamlit as st
+import requests
 import pandas as pd
 from datetime import datetime
 from google import genai
+from io import BytesIO
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 
-# -------------------------------------------------
+# ======================================================
 # PAGE CONFIG
-# -------------------------------------------------
-st.set_page_config(
-    page_title="🌾 AgroNova",
-    page_icon="🌱",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# ======================================================
+st.set_page_config(page_title="🌾 AgroNova Enterprise", layout="wide")
 
-# -------------------------------------------------
-# CLEAN PREMIUM GREEN UI
-# -------------------------------------------------
+# ======================================================
+# UI
+# ======================================================
 st.markdown("""
 <style>
-* {
-    font-family: 'Inter', sans-serif;
-}
-
-.stApp {
-    background: linear-gradient(135deg, #071e14, #0c2f20);
-    color: #e8f5ec;
-}
-
-.block-container {
-    max-width: 1100px;
-    padding-top: 2rem;
-}
-
-/* Header */
-.header-container {
-    background: linear-gradient(90deg, #0f3d28, #145c3a);
-    padding: 2rem;
-    border-radius: 20px;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(255,255,255,0.08);
-}
-
-.header-container h1 {
-    font-size: 2.6rem;
-    font-weight: 800;
-    margin-bottom: 0.3rem;
-}
-
-.header-container p {
-    opacity: 0.8;
-}
-
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #0d2a1d;
-}
-
-/* Cards */
-.card {
-    background: #0f3d28;
-    padding: 1.5rem;
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.06);
-    margin-bottom: 1.2rem;
-}
-
-/* Buttons */
-.stButton>button {
-    background: linear-gradient(90deg, #22c55e, #16a34a);
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    padding: 0.7rem 1.4rem;
-    color: white;
-}
-
-.stButton>button:hover {
-    background: linear-gradient(90deg, #16a34a, #15803d);
-}
-
-/* Recommendation Card */
-.recommendation {
-    background: #0c3323;
-    padding: 1.5rem;
-    border-radius: 14px;
-    border-left: 4px solid #22c55e;
-    margin-bottom: 1rem;
-    line-height: 1.6;
-}
-
-/* Chat */
-.user-msg {
-    background: #1e3a8a;
-    padding: 1rem;
-    border-radius: 14px;
-    margin-bottom: 0.5rem;
-}
-
-.ai-msg {
-    background: #0c3323;
-    padding: 1rem;
-    border-radius: 14px;
-    margin-bottom: 0.5rem;
-    border-left: 4px solid #22c55e;
-}
-
-/* Footer */
-.footer {
-    text-align: center;
-    margin-top: 3rem;
-    opacity: 0.7;
-    font-size: 0.9rem;
-}
+.stApp { background: linear-gradient(135deg,#0c2f20,#071e14); color:#e8f5ec; }
+.header { background:#145c3a; padding:1.5rem; border-radius:15px; margin-bottom:1rem; }
+.card { background:#0f3d28; padding:1rem; border-radius:10px; margin-bottom:1rem; }
+.stButton>button { background:#22c55e; color:white; border:none; }
 </style>
 """, unsafe_allow_html=True)
 
-# -------------------------------------------------
-# GEMINI API
-# -------------------------------------------------
+st.markdown("""
+<div class="header">
+<h1>🌾 AgroNova Enterprise Elite</h1>
+<p>Weather-Aware • Multimodal • Risk Classified • Enterprise AI System</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ======================================================
+# API INITIALIZATION
+# ======================================================
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("🔐 Add GOOGLE_API_KEY in Streamlit Secrets")
+    st.error("Missing GOOGLE_API_KEY in Streamlit Secrets.")
     st.stop()
 
 client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
-MODEL_NAME = "gemini-1.5-flash"   # Stable model
+# ======================================================
+# MODEL ROUTER
+# ======================================================
+AVAILABLE_MODELS = [
+    "gemini-3-flash-preview"
+]
 
-# -------------------------------------------------
-# HEADER
-# -------------------------------------------------
-st.markdown("""
-<div class="header-container">
-    <h1>🌾 AgroNova</h1>
-    <p>AI-Powered Smart Farming Intelligence • Global & Region-Aware</p>
-</div>
-""", unsafe_allow_html=True)
+def get_working_model():
+    for model in AVAILABLE_MODELS:
+        try:
+            client.models.generate_content(
+                model=model,
+                contents="Test",
+                config={"max_output_tokens": 5}
+            )
+            return model
+        except:
+            continue
+    return None
 
-# -------------------------------------------------
-# SIDEBAR SETTINGS
-# -------------------------------------------------
+MODEL_NAME = get_working_model()
+
+if not MODEL_NAME:
+    st.error("No accessible Gemini model found. Check API permissions.")
+    st.stop()
+
+# ======================================================
+# SIDEBAR
+# ======================================================
 with st.sidebar:
     st.header("Farm Configuration")
+    country = st.selectbox("Country", ["India","USA","Canada","Brazil"])
+    state = st.text_input("State / Province")
+    crop_stage = st.selectbox("Crop Stage",["Planning","Sowing","Growing","Harvesting"])
+    goals = st.multiselect("Goals",["High Yield","Low Cost","Organic","Water Saving"])
+    temperature = st.slider("AI Creativity",0.2,0.8,0.4)
+    language = st.selectbox("Language",["English","Hindi"])
+    weather_key = st.text_input("Weather API Key (Optional)")
 
-    country = st.selectbox(
-        "Country",
-        ["India", "Ghana", "Canada", "USA", "Brazil", "Australia"]
-    )
+# ======================================================
+# WEATHER SERVICE
+# ======================================================
+def get_weather(location,key):
+    if not key or not location:
+        return None
+    try:
+        url=f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={key}&units=metric"
+        data=requests.get(url).json()
+        return {
+            "Temp":data["main"]["temp"],
+            "Humidity":data["main"]["humidity"]
+        }
+    except:
+        return None
 
-    location = st.text_input("State / Province")
+weather_data=get_weather(state,weather_key)
 
-    crop_stage = st.selectbox(
-        "Crop Stage",
-        ["Planning", "Sowing", "Growing", "Harvesting", "Storage"]
-    )
+if weather_data:
+    st.info(f"🌦 Temp: {weather_data['Temp']}°C | Humidity: {weather_data['Humidity']}%")
 
-    priorities = st.multiselect(
-        "Goals",
-        ["High Yield", "Low Cost", "Organic", "Water Saving",
-         "Pest Control", "Soil Health"]
-    )
+# ======================================================
+# INPUT
+# ======================================================
+uploaded_image = st.file_uploader("Upload crop image (optional)",type=["jpg","png","jpeg"])
+question = st.text_area("Describe farm issue")
 
-    temperature = st.slider(
-        "AI Creativity",
-        0.2, 0.8, 0.4,
-        help="Lower = safer advice | Higher = creative suggestions"
-    )
+# ======================================================
+# SAFETY CLASSIFIER
+# ======================================================
+def classify_risk(text):
+    risk_keywords=["toxic","high chemical","dangerous","poison"]
+    for word in risk_keywords:
+        if word in text.lower():
+            return "🔴 High Risk"
+    if "chemical" in text.lower():
+        return "🟡 Moderate Risk"
+    return "🟢 Safe"
 
-# -------------------------------------------------
-# SESSION STATE
-# -------------------------------------------------
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+# ======================================================
+# GENERATE
+# ======================================================
+if st.button("Generate Enterprise Farm Plan"):
 
-# -------------------------------------------------
-# MAIN TABS
-# -------------------------------------------------
-tab1, tab2 = st.tabs(["Farm Plan", "Chat Assistant"])
-
-# =================================================
-# TAB 1 — FARM PLAN
-# =================================================
-with tab1:
-
-    st.subheader("Generate Smart Farm Plan")
-
-    if st.button("Generate Recommendations"):
-
-        if not location:
-            st.warning("Please enter your state/province.")
-        else:
-            try:
-                with st.spinner("Analyzing farm conditions..."):
-
-                    prompt = f"""
-You are an expert agricultural advisor.
-
-Farmer Context:
-Country: {country}
-State: {location}
-Crop Stage: {crop_stage}
-Goals: {', '.join(priorities) if priorities else 'General productivity'}
-
-Provide EXACTLY 3 farming recommendations.
-
-Format strictly:
-
-Recommendation 1:
-• Action:
-• Why:
-
-Recommendation 2:
-• Action:
-• Why:
-
-Recommendation 3:
-• Action:
-• Why:
-
-Use simple language.
-Be region-specific.
-Avoid unsafe chemical instructions.
-"""
-
-                    response = client.models.generate_content(
-                        model=MODEL_NAME,
-                        contents=prompt,
-                        config={
-                            "temperature": temperature,
-                            "max_output_tokens": 900
-                        }
-                    )
-
-                    if hasattr(response, "text") and response.text:
-                        recommendations = response.text.split("\n\n")
-                    else:
-                        recommendations = ["⚠️ No response received."]
-
-                    st.success("Farm plan ready!")
-
-                    for rec in recommendations[:3]:
-                        if rec.strip():
-                            st.markdown(f"""
-                            <div class="recommendation">
-                            {rec}
-                            </div>
-                            """, unsafe_allow_html=True)
-
-            except Exception:
-                st.error("⚠️ AI service temporarily unavailable.")
-
-# =================================================
-# TAB 2 — CHAT ASSISTANT
-# =================================================
-with tab2:
-
-    st.subheader("Ask AgroNova")
-
-    for msg in st.session_state.chat_history:
-        if msg["role"] == "user":
-            st.markdown(f'<div class="user-msg"><b>You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="ai-msg"><b>AgroNova:</b> {msg["content"]}</div>', unsafe_allow_html=True)
-
-    user_input = st.text_input("Ask your farming question")
-
-    if st.button("Send") and user_input:
-
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
-
+    if not state or not question:
+        st.warning("Complete required fields.")
+    else:
         try:
-            with st.spinner("AgroNova is thinking..."):
+            base_prompt=f"""
+You are AgroNova Enterprise AI.
 
-                prompt = f"""
-You are AgroNova, an agricultural AI assistant.
+Country:{country}
+State:{state}
+Crop Stage:{crop_stage}
+Goals:{', '.join(goals)}
+Weather:{weather_data}
 
-Farmer Context:
-Country: {country}
-State: {location}
-Crop Stage: {crop_stage}
-Goals: {', '.join(priorities) if priorities else 'General'}
+Question:{question}
 
-Answer clearly and simply.
-Avoid unsafe instructions.
-Focus on practical advice.
-
-User question:
-{user_input}
+Provide 3 practical recommendations.
+Avoid unsafe chemical instructions.
+Language:{language}
 """
 
-                response = client.models.generate_content(
-                    model=MODEL_NAME,
-                    contents=prompt,
-                    config={
-                        "temperature": temperature,
-                        "max_output_tokens": 800
-                    }
-                )
+            contents=base_prompt
 
-                if hasattr(response, "text") and response.text:
-                    reply = response.text
-                else:
-                    reply = "I could not generate a response."
+            if uploaded_image:
+                contents=[
+                    {"text":base_prompt},
+                    {"inline_data":{
+                        "mime_type":uploaded_image.type,
+                        "data":uploaded_image.getvalue()
+                    }}
+                ]
 
-                st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                st.rerun()
-
-        except Exception:
-            st.session_state.chat_history.append(
-                {"role": "assistant", "content": "⚠️ AI service busy. Try again."}
+            # Model comparison mode
+            response_low=client.models.generate_content(
+                model=MODEL_NAME,
+                contents=contents,
+                config={"temperature":0.3,"max_output_tokens":800}
             )
-            st.rerun()
 
-    if st.session_state.chat_history:
-        if st.button("Clear Chat"):
-            st.session_state.chat_history = []
-            st.rerun()
+            response_high=client.models.generate_content(
+                model=MODEL_NAME,
+                contents=contents,
+                config={"temperature":0.7,"max_output_tokens":800}
+            )
 
-# -------------------------------------------------
-# FOOTER
-# -------------------------------------------------
-st.markdown(f"""
-<div class="footer">
-AgroNova • AI Smart Farming Assistant • {datetime.now().year}
-</div>
-""", unsafe_allow_html=True)
+            low_text=response_low.text if hasattr(response_low,"text") else ""
+            high_text=response_high.text if hasattr(response_high,"text") else ""
+
+            st.subheader("Stable Mode (0.3)")
+            st.markdown(f'<div class="card">{low_text}</div>',unsafe_allow_html=True)
+
+            st.subheader("Creative Mode (0.7)")
+            st.markdown(f'<div class="card">{high_text}</div>',unsafe_allow_html=True)
+
+            risk=classify_risk(low_text)
+            st.success(f"Safety Classification: {risk}")
+
+            # ======================================================
+            # PDF REPORT
+            # ======================================================
+            buffer=BytesIO()
+            doc=SimpleDocTemplate(buffer)
+            styles=getSampleStyleSheet()
+            elements=[]
+
+            elements.append(Paragraph("AgroNova Enterprise Report",styles["Heading1"]))
+            elements.append(Spacer(1,0.3*inch))
+            elements.append(Paragraph(low_text.replace("\n","<br/>"),styles["Normal"]))
+            elements.append(Spacer(1,0.3*inch))
+            elements.append(Paragraph("Safety: "+risk,styles["Normal"]))
+
+            doc.build(elements)
+            buffer.seek(0)
+
+            st.download_button(
+                "Download Enterprise PDF",
+                buffer,
+                file_name="AgroNova_Enterprise_Report.pdf",
+                mime="application/pdf"
+            )
+
+        except Exception as e:
+            st.error("AI service temporarily unavailable.")
