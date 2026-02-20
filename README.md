@@ -14,7 +14,16 @@
 
 ---
 
-## 📋 Project Overview
+## � Project Links
+
+| Resource | Link |
+|----------|------|
+| 🚀 Live App | [Open Live App](https://idai103-1000414-aditya-jitendra-kumar-sahani.streamlit.app/) |
+| 🎨 Canva Storyboard | [View Storyboard](https://www.canva.com/design/DAG987mWPuk/_1x5bAWimiHJD39bXwmLNw/view?utm_content=DAG987mWPuk&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hc63e6bba5d) |
+
+---
+
+## �📋 Project Overview
 
 **AgSaathi** is an AI-powered smart farming assistant built using **Python**, **Streamlit**, and **Google Gemini**. It provides hyper-local agricultural intelligence to farmers across India, Canada, and Ghana — covering crop recommendations, pest & disease diagnosis, smart weather alerts, soil health analysis, and sustainable farming guidance.
 
@@ -311,6 +320,16 @@ Streamlit Cloud automatically installs dependencies and hosts the application wi
 ## 📌 Conclusion
 
 AgSaathi demonstrates the full lifecycle of a Generative AI-powered application — from structured prompt engineering and multi-module design to cloud deployment. It shows how AI can make specialized agricultural expertise universally accessible, helping farmers grow smarter and more sustainably.
+
+---
+
+## 👥 Contributors
+
+| Name | WACP No. |
+|------|----------|
+| Aditya Jitendra Kumar Sahani | 1000414 |
+| Mann Paresh Patel | 1000428 |
+| Zene Sophie Anand | 1000442 |
 
 ---
 
