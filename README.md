@@ -259,8 +259,8 @@ AgSaathi integrates multiple Python libraries and Streamlit features:
 Clone the repository:
 
 ```bash
-git clone https://github.com/adityasahani392217/FA.git
-cd FA
+git clone https://github.com/adityasahani392217/IDAI103-1000414-ADITYA-JITENDRA-KUMAR-SAHANI
+cd IDAI103-1000414-ADITYA-JITENDRA-KUMAR-SAHANI
 ```
 
 Install required dependencies:
